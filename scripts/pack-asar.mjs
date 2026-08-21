@@ -5,6 +5,13 @@ import { fileURLToPath } from 'node:url'
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const sourceRoot = path.join(repoRoot, 'app')
 const outputPath = path.join(repoRoot, 'dist', 'MarkText-math-macros', 'resources', 'app.asar')
+const requiredRuntimeModules = [
+  'ced',
+  'font-list',
+  'keytar',
+  'native-keymap',
+  path.join('@vscode', 'ripgrep-win32-x64')
+]
 
 const align4 = (value) => value + ((4 - (value % 4)) % 4)
 
@@ -49,6 +56,9 @@ function makePayload(records) {
 }
 
 async function main() {
+  for (const modulePath of requiredRuntimeModules) {
+    await fs.access(path.join(sourceRoot, 'node_modules', modulePath))
+  }
   const tree = await collect(sourceRoot)
   const payload = makePayload(tree.records)
   const header = { files: tree.files }

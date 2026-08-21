@@ -57,14 +57,25 @@ upstream bundle change visible instead of silently producing a partial build.
 
 The delivered `setup.exe` is a self-extracting 7-Zip installer. It installs
 per-user into `%LOCALAPPDATA%\Programs\MarkText-math-macros` and launches the
-installed `marktext.exe`; it does not require administrator permission.
+installed `marktext.exe` with a separate `marktext-user-data` directory; it
+does not require administrator permission. The separate directory prevents
+the fork from sharing MarkText's single-instance lock and preferences with an
+official installation.
+
+The official Windows package keeps several runtime packages in
+`resources/app.asar.unpacked/node_modules`. The local `app/` tree used by the
+small ASAR packer also needs their JavaScript package files, so synchronize
+them before packing. For v0.19.1 this is `ced`, `font-list`, `keytar`,
+`native-keymap`, and `@vscode/ripgrep-win32-x64`:
 
 The packaging sequence is:
 
 ```powershell
+node scripts/sync-runtime-dependencies.mjs
 node scripts/apply-math-macros-patch.mjs
 node scripts/test-math-macros.mjs
 node scripts/pack-asar.mjs
+node scripts/prepare-setup-staging.mjs
 7z a -t7z -mx=9 dist/work/marktext-math-macros.7z dist/MarkText-math-macros/*
 node scripts/build-setup.mjs
 ```
