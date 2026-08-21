@@ -1,0 +1,7 @@
+# The official v0.19.1 runtime is kept locally for packaging, but is not
+# committed as source. Re-run the documented patch script after an upstream
+# update or a fresh app bundle.
+/app/
+/dist/
+/work/
+
