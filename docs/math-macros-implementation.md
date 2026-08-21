@@ -53,3 +53,22 @@ node scripts/test-math-macros.mjs
 The patch script fails if an expected anchor is missing, which makes an
 upstream bundle change visible instead of silently producing a partial build.
 
+## Rebuilding the delivered Windows package
+
+The delivered `setup.exe` is a self-extracting 7-Zip installer. It installs
+per-user into `%LOCALAPPDATA%\Programs\MarkText-math-macros` and launches the
+installed `marktext.exe`; it does not require administrator permission.
+
+The packaging sequence is:
+
+```powershell
+node scripts/apply-math-macros-patch.mjs
+node scripts/test-math-macros.mjs
+node scripts/pack-asar.mjs
+7z a -t7z -mx=9 dist/work/marktext-math-macros.7z dist/MarkText-math-macros/*
+node scripts/build-setup.mjs
+```
+
+The generated file is
+`dist/marktext-math-macros-0.19.1-setup.exe`. It is unsigned, so Windows may
+show the normal SmartScreen warning for a locally built executable.
