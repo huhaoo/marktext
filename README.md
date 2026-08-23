@@ -10,15 +10,16 @@
    `%APPDATA%\marktext` 自动复制主要设置和 Local Storage（包括
    `latex-alias`），之后定制版继续使用自己的设置目录，不会和官方版互相
    覆盖。再次安装不会重复覆盖已经存在的定制版设置。
-2. **增加 `latex-alias` 功能**：在 Preferences 的 Math macros / LaTeX
-   aliases 区域中，每行定义一个 KaTeX 宏：
+2. **增加 `latex-alias` 功能**：在 Preferences 的 Features 分类中
+   （中文界面显示为“功能”）打开 LaTeX macros（中文界面显示为
+   “LaTeX 宏”），每行定义一个 KaTeX 宏：
 
    ```text
    \R = \mathbb{R}
    \norm = \left\lVert #1 \right\rVert
    ```
 
-   这些别名只作用于数学环境，不会改写普通 Markdown 文本或代码块。
+   这些宏只作用于数学环境，不会改写普通 Markdown 文本或代码块。
 3. **个人修改版**：修改集中在补丁脚本、构建脚本和文档中，便于后续官方
    版本更新后重新应用；不会假设可以直接与官方分支自动合并。
 
@@ -30,10 +31,12 @@
 setup.exe 应作为本修改版的 GitHub Release asset 发布，不建议把生成的二进制
 直接提交进 Git 仓库。当前构建仍以官方 `v0.19.1` 为基线。
 
-## LaTeX aliases
+## LaTeX macros
 
-The feature adds a small Math macros editor to the Preferences window. Each
-line defines one KaTeX macro:
+The feature adds a small LaTeX macros editor under
+**Preferences > Features > LaTeX macros**. The category and control labels
+follow the selected MarkText language; they are not shown as mixed-language
+labels. Each line defines one KaTeX macro:
 
 ```text
 \R = \mathbb{R}

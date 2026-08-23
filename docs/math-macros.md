@@ -1,8 +1,9 @@
-# Math macros
+# LaTeX macros
 
-Open **Preferences**, scroll to **Math macros / 数学宏**, and enter one
-definition per line. The setting is stored in the MarkText renderer's local
-settings storage and does not change the Markdown file.
+Open **Preferences > Features > LaTeX macros** and enter one definition per
+line. In the Chinese interface, the same category and control are shown as
+“功能” and “LaTeX 宏”. The setting is stored in the MarkText renderer's
+local settings storage and does not change the Markdown file.
 
 Examples:
 

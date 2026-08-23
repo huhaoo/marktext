@@ -7,8 +7,10 @@ bundle under `app/`. The patch is intentionally small:
 
 1. `app/out/renderer/math-macros-core.js` parses the preference text and reads
    `localStorage['marktext.mathMacros']`.
-2. `app/out/renderer/math-macros-preferences.js` adds a textarea to the normal
-   Preferences page and writes that value to local storage.
+2. `app/out/renderer/math-macros-preferences.js` adds a dedicated **Features**
+   preference category and a LaTeX macros textarea, then writes that value to
+   local storage. Its visible labels are selected from the current interface
+   language rather than combining multiple languages in one label.
 3. `scripts/apply-math-macros-patch.mjs` adds those scripts to the renderer and
    changes the three KaTeX calls in the bundled renderer. It also adds the
    macro configuration to the math-render cache key, so two macro settings do

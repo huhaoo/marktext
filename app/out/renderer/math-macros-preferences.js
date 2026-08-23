@@ -7,13 +7,21 @@
     return Boolean(document.querySelector('.pref-container'))
   }
 
+  function isFeaturesPage() {
+    return /#\/preference\/features(?:[/?#]|$)/.test(window.location.hash)
+  }
+
   function addControl() {
-    if (!isPreferencePage()) {
+    if (!isPreferencePage() || !isFeaturesPage()) {
       return
     }
 
     const container = document.querySelector('.pref-setting')
     if (!container || document.getElementById(CONTROL_ID)) {
+      const existing = document.getElementById(CONTROL_ID)
+      if (existing) {
+        updateLabels(existing)
+      }
       return
     }
 
@@ -28,11 +36,9 @@
     section.style.cssText = 'font-size:14px;user-select:none;margin:32px 0;color:var(--editorColor);width:100%;'
 
     const title = document.createElement('h6')
-    title.textContent = 'Math macros / 数学宏'
     title.style.cssText = 'padding-bottom:6px;margin:0;color:var(--editorColor);font-size:15px;font-weight:500;'
 
     const notes = document.createElement('div')
-    notes.textContent = 'One definition per line. Example: \\R = \\mathbb{R}   |   \\norm = \\left\\lVert #1 \\right\\rVert'
     notes.style.cssText = 'margin:8px 0 10px;font-size:12px;line-height:1.5;color:var(--editorColor80);user-select:text;'
 
     const textarea = document.createElement('textarea')
@@ -47,16 +53,27 @@
 
     const clear = document.createElement('button')
     clear.type = 'button'
-    clear.textContent = 'Clear / 清空'
     clear.style.cssText = 'padding:4px 10px;border:1px solid var(--editorColor10);border-radius:3px;background:transparent;color:var(--editorColor);cursor:pointer;'
 
     const status = document.createElement('span')
-    status.textContent = 'Saved locally / 已保存'
     status.style.cssText = 'font-size:12px;color:var(--editorColor60);'
+
+    function updateLabels(section) {
+      const labels = core.getLabels?.() || {
+        title: 'LaTeX macros',
+        note: 'Define one LaTeX macro per line.',
+        clear: 'Clear',
+        saved: 'Saved locally'
+      }
+      section.querySelector('h6').textContent = labels.title
+      section.querySelector('[data-role="notes"]').textContent = labels.note
+      section.querySelector('[data-role="clear"]').textContent = labels.clear
+      section.querySelector('[data-role="status"]').textContent = labels.saved
+    }
 
     function save() {
       core.set(textarea.value)
-      status.textContent = 'Saved locally / 已保存；重新渲染公式后生效'
+      status.textContent = (core.getLabels?.() || { saved: 'Saved locally' }).saved
     }
 
     textarea.addEventListener('input', save)
@@ -65,9 +82,13 @@
       save()
     })
 
+    notes.dataset.role = 'notes'
+    clear.dataset.role = 'clear'
+    status.dataset.role = 'status'
     footer.append(clear, status)
     section.append(title, notes, textarea, footer)
     container.appendChild(section)
+    updateLabels(section)
   }
 
   function schedule() {
@@ -78,6 +99,7 @@
   observer.observe(document.documentElement, { childList: true, subtree: true })
   document.addEventListener('DOMContentLoaded', schedule)
   window.addEventListener('languageChanged', schedule)
+  window.addEventListener('marktext-math-macros-language-changed', schedule)
+  window.addEventListener('hashchange', schedule)
   schedule()
 })()
-

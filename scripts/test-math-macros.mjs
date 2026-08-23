@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict'
+import fs from 'node:fs'
 import { createRequire } from 'node:module'
 import { parseMathMacros } from '../src/mathMacros.mjs'
 
@@ -29,4 +30,18 @@ assert.deepEqual(parseMathMacros('{"\\\\Q":"\\\\mathbb{Q}"}'), {
   '\\Q': '\\mathbb{Q}'
 })
 
-console.log('math macro parser and KaTeX integration: ok')
+const coreSource = fs.readFileSync(new URL('../app/out/renderer/math-macros-core.js', import.meta.url), 'utf8')
+const preferencesSource = fs.readFileSync(new URL('../app/out/renderer/math-macros-preferences.js', import.meta.url), 'utf8')
+const bundleSource = fs.readFileSync(new URL('../app/out/renderer/assets/index-B-PE276Q.js', import.meta.url), 'utf8')
+
+assert.match(coreSource, /getCategoryLabel/)
+assert.match(coreSource, /'zh-cn'/)
+assert.match(coreSource, /LaTeX macros/)
+assert.match(coreSource, /LaTeX 宏/)
+assert.doesNotMatch(coreSource, /LaTeX aliases/)
+assert.ok(!preferencesSource.includes('Math macros / 数学宏'))
+assert.match(preferencesSource, /isFeaturesPage/)
+assert.match(bundleSource, /path: "\/preference\/features"/)
+assert.match(bundleSource, /path: "features"/)
+
+console.log('math macro parser, KaTeX integration, Features route, and locale labels: ok')

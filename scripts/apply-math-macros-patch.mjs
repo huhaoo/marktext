@@ -97,6 +97,94 @@ if (!bundle.includes(marker)) {
   console.log('Renderer bundle already contains the math-macro patch.')
 }
 
+const featuresMarker = '/* MARKTEXT_MATH_MACROS_FEATURES_PATCH */'
+if (!bundle.includes(featuresMarker)) {
+  bundle = replaceOnce(
+    bundle,
+    [
+      '  {',
+      '    name: t("preferences.categories.spelling"),',
+      '    label: "spelling",',
+      '    icon: reading_default,',
+      '    path: "/preference/spelling"',
+      '  },'
+    ].join('\n'),
+    [
+      '  {',
+      '    name: window.marktextMathMacros?.getCategoryLabel?.() || "Features",',
+      '    label: "features",',
+      '    icon: setting_default,',
+      '    path: "/preference/features"',
+      '  },',
+      '  {',
+      '    name: t("preferences.categories.spelling"),',
+      '    label: "spelling",',
+      '    icon: reading_default,',
+      '    path: "/preference/spelling"',
+      '  },'
+    ].join('\n'),
+    'features preference category'
+  )
+
+  bundle = replaceOnce(
+    bundle,
+    [
+      '        "general",',
+      '        "editor",',
+      '        "markdown",',
+      '        "spelling",'
+    ].join('\n'),
+    [
+      '        "general",',
+      '        "editor",',
+      '        "markdown",',
+      '        "features",',
+      '        "spelling",'
+    ].join('\n'),
+    'features search route'
+  )
+
+  bundle = replaceOnce(
+    bundle,
+    'const parseSettingsPage = (type5) => {',
+    [
+      featuresMarker,
+      'const Features = { render: () => null };',
+      'const parseSettingsPage = (type5) => {'
+    ].join('\n'),
+    'features route component'
+  )
+
+  bundle = replaceOnce(
+    bundle,
+    [
+      '      {',
+      '        path: "spelling",',
+      '        component: SpellChecker2,',
+      '        name: "spelling"',
+      '      },'
+    ].join('\n'),
+    [
+      '      {',
+      '        path: "features",',
+      '        component: Features,',
+      '        name: "features"',
+      '      },',
+      '      {',
+      '        path: "spelling",',
+      '        component: SpellChecker2,',
+      '        name: "spelling"',
+      '      },'
+    ].join('\n'),
+    'features route'
+  )
+
+  write(bundlePath, bundle)
+  console.log('Added the Features preference category.')
+} else {
+  console.log('Features preference category already exists.')
+}
+
 let index = read(indexPath)
 if (!index.includes('./math-macros-core.js')) {
   index = index.replace(
@@ -113,4 +201,3 @@ if (!index.includes('./math-macros-preferences.js')) {
 }
 write(indexPath, index)
 console.log('Installed renderer helper scripts.')
-
