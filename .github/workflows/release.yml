@@ -206,7 +206,9 @@ jobs:
       - name: Publish release
         uses: softprops/action-gh-release@v2.6.2
         with:
-          draft: true
+          # Publish personal-fork releases immediately so the generated
+          # Windows installers are visible on the repository Releases page.
+          draft: false
           prerelease: ${{ contains(github.ref_name, '-') }}
           generate_release_notes: true
           name: ${{ github.ref_name }}
