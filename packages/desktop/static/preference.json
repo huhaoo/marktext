@@ -61,6 +61,7 @@
   "lightModeTheme": "light",
   "darkModeTheme": "dark",
   "customCss": "",
+  "mathMacros": "",
 
   "spellcheckerEnabled": false,
   "spellcheckerNoUnderline": false,
