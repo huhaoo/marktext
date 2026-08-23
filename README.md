@@ -8,9 +8,9 @@
 
 1. **自动复制设置**：首次通过 setup.exe 安装时，会从官方 MarkText 的
    `%APPDATA%\marktext` 自动复制主要设置和 Local Storage（包括
-   `latex-alias`），之后定制版继续使用自己的设置目录，不会和官方版互相
+   LaTeX 宏设置），之后定制版继续使用自己的设置目录，不会和官方版互相
    覆盖。再次安装不会重复覆盖已经存在的定制版设置。
-2. **增加 `latex-alias` 功能**：在 Preferences 的 Features 分类中
+2. **增加 LaTeX macros 功能**：在 Preferences 的 Features 分类中
    （中文界面显示为“功能”）打开 LaTeX macros（中文界面显示为
    “LaTeX 宏”），每行定义一个 KaTeX 宏：
 
