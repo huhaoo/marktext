@@ -441,6 +441,7 @@ export const MUYA_DEFAULT_OPTION = Object.freeze({
   // Markdown extensions
   superSubScript: false,
   footnote: false,
+  mathMacros: '',
   isGitlabCompatibilityEnabled: false,
 
   // Whether HTML rendering is disabled or not.

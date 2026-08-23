@@ -405,10 +405,12 @@
         "view": "Affichage",
         "searcher": "Recherche",
         "watcher": "Surveillant",
+        "features": "Fonctionnalités",
         "spelling": "Orthographe",
         "custom css": "CSS personnalisé"
       },
       "items": {
+        "mathMacros": "Macros LaTeX",
         "autoSave": "Sauvegarder automatiquement le contenu en cours d'édition",
         "autoSaveDelay": "Le temps en ms après un changement avant que le fichier soit sauvegardé",
         "autoNormalizeLineEndings": "Normaliser automatiquement les fins de ligne en LF et éventuellement les nouvelles lignes de fin à l'ouverture",
@@ -482,6 +484,7 @@
       "general": "Général",
       "editor": "Éditeur",
       "markdown": "Markdown",
+      "features": "Fonctionnalités",
       "spelling": "Orthographe",
       "theme": "Thème",
       "image": "Image",
@@ -806,6 +809,14 @@
         "orderListDelimiter": "Délimiteur de liste ordonnée",
         "preferLooseListItem": "Préférer les éléments de liste lâches",
         "title": "Listes"
+      }
+    },
+    "features": {
+      "title": "Fonctionnalités",
+      "mathMacros": {
+        "description": "Macros LaTeX",
+        "placeholder": "\\R = \\mathbb{R}",
+        "notes": "Une macro par ligne. Exemple : \\norm = \\left\\lVert #1 \\right\\rVert"
       }
     },
     "spelling": {

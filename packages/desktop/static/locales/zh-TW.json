@@ -405,10 +405,12 @@
         "view": "檢視",
         "searcher": "搜尋器",
         "watcher": "監聽器",
+        "features": "功能",
         "spelling": "拼字",
         "custom css": "自訂 CSS"
       },
       "items": {
+        "mathMacros": "LaTeX 宏",
         "autoSave": "自動儲存正在編輯的內容",
         "autoSaveDelay": "檔案儲存前的延遲時間（毫秒）",
         "autoNormalizeLineEndings": "開啟時自動將行尾標準化為 LF，可選擇處理結尾換行符",
@@ -482,6 +484,7 @@
       "general": "一般",
       "editor": "編輯器",
       "markdown": "Markdown",
+      "features": "功能",
       "spelling": "拼字",
       "theme": "主題",
       "image": "圖片",
@@ -806,6 +809,14 @@
         "orderListDelimiter": "有序清單分隔符",
         "preferLooseListItem": "偏好鬆散清單項目",
         "title": "清單"
+      }
+    },
+    "features": {
+      "title": "功能",
+      "mathMacros": {
+        "description": "LaTeX 宏",
+        "placeholder": "\\R = \\mathbb{R}",
+        "notes": "每行定義一個宏。例如：\\norm = \\left\\lVert #1 \\right\\rVert"
       }
     },
     "spelling": {

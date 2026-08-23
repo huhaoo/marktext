@@ -5,6 +5,7 @@ import { CLASS_OR_ID, DEVICE_MEMORY, PREVIEW_DOMPURIFY_CONFIG, HAS_TEXT_BLOCK_RE
 import { tokenizer } from '../../'
 import { snakeToCamel, sanitize, escapeHTML, getLongUniqueId, getImageInfo } from '../../../utils'
 import { h, htmlToVNode } from '../snabbdom'
+import { parseMathMacros } from '../../../utils/mathMacros'
 
 // todo@jocs any better solutions?
 const MARKER_HASK = {
@@ -152,7 +153,8 @@ export default function renderLeafBlock(parent, block, activeBlocks, matches, us
         break
       }
       case 'multiplemath': {
-        const key = `${code}_display_math`
+        const macros = parseMathMacros(this.muya.options.mathMacros)
+        const key = `${code}_display_math_${JSON.stringify(macros)}`
         selector += `.${CLASS_OR_ID.AG_CONTAINER_PREVIEW}`
         Object.assign(data.attrs, { spellcheck: 'false' })
         if (code === '') {
@@ -163,7 +165,8 @@ export default function renderLeafBlock(parent, block, activeBlocks, matches, us
         } else {
           try {
             const html = katex.renderToString(code, {
-              displayMode: true
+              displayMode: true,
+              macros
             })
 
             children = htmlToVNode(html)

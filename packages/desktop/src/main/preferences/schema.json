@@ -312,6 +312,11 @@
     "type": "string",
     "default": ""
   },
+  "mathMacros": {
+    "description": "Features--LaTeX macros",
+    "type": "string",
+    "default": ""
+  },
   "spellcheckerEnabled": {
     "description": "Spelling--Whether spell checking is enabled.",
     "type": "boolean",

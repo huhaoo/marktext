@@ -404,10 +404,12 @@
         "view": "View",
         "searcher": "Searcher",
         "watcher": "Watcher",
+        "features": "Features",
         "spelling": "Spelling",
         "custom css": "Custom CSS"
       },
       "items": {
+        "mathMacros": "LaTeX macros",
         "autoSave": "Automatically save the content being edited",
         "autoSaveDelay": "The time in ms after a change that the file is saved",
         "titleBarStyle": "The title bar style (Windows and Linux system only)",
@@ -480,6 +482,7 @@
       "general": "General",
       "editor": "Editor",
       "markdown": "Markdown",
+      "features": "Features",
       "spelling": "Spelling",
       "theme": "Theme",
       "image": "Image",
@@ -803,6 +806,14 @@
         "orderListDelimiter": "Ordered list delimiter",
         "preferLooseListItem": "Prefer loose list items",
         "title": "Lists"
+      }
+    },
+    "features": {
+      "title": "Features",
+      "mathMacros": {
+        "description": "LaTeX macros",
+        "placeholder": "\\R = \\mathbb{R}",
+        "notes": "One definition per line. Example: \\norm = \\left\\lVert #1 \\right\\rVert"
       }
     },
     "spelling": {

@@ -2,6 +2,7 @@ import katex from 'katex'
 import 'katex/dist/contrib/mhchem.min.js'
 import { CLASS_OR_ID } from '../../../config'
 import { htmlToVNode } from '../snabbdom'
+import { parseMathMacros } from '../../../utils/mathMacros'
 
 import 'katex/dist/katex.min.css'
 
@@ -23,7 +24,8 @@ export default function displayMath(h, cursor, block, token, outerClass) {
   const { loadMathMap } = this
 
   const displayMode = false
-  const key = `${math}_${type}`
+  const macros = parseMathMacros(this.muya.options.mathMacros)
+  const key = `${math}_${type}_${JSON.stringify(macros)}`
   let mathVnode = null
   let previewSelector = `span.${CLASS_OR_ID.AG_MATH_RENDER}`
   if (loadMathMap.has(key)) {
@@ -31,7 +33,8 @@ export default function displayMath(h, cursor, block, token, outerClass) {
   } else {
     try {
       const html = katex.renderToString(math, {
-        displayMode
+        displayMode,
+        macros
       })
       mathVnode = htmlToVNode(html)
       loadMathMap.set(key, mathVnode)

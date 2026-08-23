@@ -5,7 +5,8 @@ import {
   Brush as ThemeIcon,
   Picture as ImageIcon,
   Reading as SpellIcon,
-  Operation as KeyBindingIcon
+  Operation as KeyBindingIcon,
+  SetUp as FeaturesIcon
 } from '@element-plus/icons-vue'
 
 import preferences from '../../../../main/preferences/schema.json'
@@ -85,6 +86,12 @@ export const getCategory = (): PrefCategory[] => [
     path: '/preference/markdown'
   },
   {
+    name: t('preferences.categories.features'),
+    label: 'features',
+    icon: FeaturesIcon,
+    path: '/preference/features'
+  },
+  {
     name: t('preferences.categories.spelling'),
     label: 'spelling',
     icon: SpellIcon,
@@ -149,6 +156,7 @@ export const getTranslatedSearchContent: CachedTranslator = (() => {
       else if (categoryName === 'Searcher') mappedCategory = 'searcher'
       else if (categoryName === 'Watcher') mappedCategory = 'watcher'
       else if (categoryName === 'Spelling') mappedCategory = 'spelling'
+      else if (categoryName === 'Features') mappedCategory = 'features'
       else if (categoryName === 'Custom CSS') mappedCategory = 'custom css'
       else {
         // Handle special category names
@@ -161,6 +169,7 @@ export const getTranslatedSearchContent: CachedTranslator = (() => {
         'general',
         'editor',
         'markdown',
+        'features',
         'spelling',
         'theme',
         'image',

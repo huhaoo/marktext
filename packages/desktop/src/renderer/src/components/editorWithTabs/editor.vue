@@ -183,6 +183,7 @@ const {
   spellcheckerEnabled,
   spellcheckerNoUnderline,
   spellcheckerLanguage,
+  mathMacros,
 
   // Edit modes
   typewriter,
@@ -1158,6 +1159,7 @@ onMounted(() => {
   const options: Record<string, unknown> = {
     focusMode: focus.value,
     markdown: props.markdown,
+    mathMacros: mathMacros.value,
     preferLooseListItem: preferLooseListItem.value,
     autoPairBracket: autoPairBracket.value,
     autoPairMarkdownSyntax: autoPairMarkdownSyntax.value,
@@ -1200,6 +1202,12 @@ onMounted(() => {
   }
 
   editor.value = new Muya(ele, options)
+
+  watch(mathMacros, (value, oldValue) => {
+    if (value === oldValue || !editor.value) return
+    editor.value.options.mathMacros = value
+    editor.value.setMarkdown(editor.value.getMarkdown(), editor.value.getCursor())
+  })
 
   const { container } = editor.value
 

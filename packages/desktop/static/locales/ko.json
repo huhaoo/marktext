@@ -405,10 +405,12 @@
         "view": "보기",
         "searcher": "검색기",
         "watcher": "감시자",
+        "features": "기능",
         "spelling": "맞춤법",
         "custom css": "사용자 정의 CSS"
       },
       "items": {
+        "mathMacros": "LaTeX 매크로",
         "autoSave": "편집 중인 내용을 자동으로 저장",
         "autoSaveDelay": "변경 후 파일이 저장되기까지의 시간(밀리초)",
         "autoNormalizeLineEndings": "파일을 열 때 줄 끝을 LF로 자동 정규화하고 선택적으로 후행 줄 바꿈을 처리합니다",
@@ -482,6 +484,7 @@
       "general": "일반",
       "editor": "편집기",
       "markdown": "마크다운",
+      "features": "기능",
       "spelling": "맞춤법",
       "theme": "테마",
       "image": "이미지",
@@ -806,6 +809,14 @@
         "orderListDelimiter": "순서 목록 구분자",
         "preferLooseListItem": "느슨한 목록 항목 선호",
         "title": "목록"
+      }
+    },
+    "features": {
+      "title": "기능",
+      "mathMacros": {
+        "description": "LaTeX 매크로",
+        "placeholder": "\\R = \\mathbb{R}",
+        "notes": "한 줄에 하나의 매크로를 정의합니다. 예: \\norm = \\left\\lVert #1 \\right\\rVert"
       }
     },
     "spelling": {

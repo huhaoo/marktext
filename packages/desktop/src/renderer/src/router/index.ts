@@ -11,11 +11,14 @@ import SpellChecker from '@/prefComponents/spellchecker/index.vue'
 import Theme from '@/prefComponents/theme/index.vue'
 import Image from '@/prefComponents/image/index.vue'
 import Keybindings from '@/prefComponents/keybindings/index.vue'
+import Features from '@/prefComponents/features/index.vue'
 
 const parseSettingsPage = (type: string | null | undefined): string => {
   let pageUrl = '/preference'
   if (type && /\/spelling$/.test(type)) {
     pageUrl += '/spelling'
+  } else if (type && /\/features$/.test(type)) {
+    pageUrl += '/features'
   }
   return pageUrl
 }
@@ -56,6 +59,11 @@ const routes = (type: string | null | undefined): RouteRecordRaw[] => [
         path: 'spelling',
         component: SpellChecker,
         name: 'spelling'
+      },
+      {
+        path: 'features',
+        component: Features,
+        name: 'features'
       },
       {
         path: 'theme',

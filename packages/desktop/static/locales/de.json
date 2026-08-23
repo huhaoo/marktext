@@ -404,10 +404,12 @@
         "view": "Ansicht",
         "searcher": "Suche",
         "watcher": "Watcher",
+        "features": "Funktionen",
         "spelling": "Rechtschreibung",
         "custom css": "Benutzerdefiniertes CSS"
       },
       "items": {
+        "mathMacros": "LaTeX-Makros",
         "autoSave": "Den bearbeiteten Inhalt automatisch speichern",
         "autoSaveDelay": "Die Zeit in ms nach einer Änderung, bis die Datei gespeichert wird",
         "autoNormalizeLineEndings": "Zeilenenden beim Öffnen automatisch zu LF normalisieren und optional nachgestellte neue Zeilen",
@@ -481,6 +483,7 @@
       "general": "Allgemein",
       "editor": "Editor",
       "markdown": "Markdown",
+      "features": "Funktionen",
       "spelling": "Rechtschreibung",
       "theme": "Design",
       "image": "Bild",
@@ -804,6 +807,14 @@
         "orderListDelimiter": "Nummerierte Liste Trennzeichen",
         "preferLooseListItem": "Lockere Listenelemente bevorzugen",
         "title": "Listen"
+      }
+    },
+    "features": {
+      "title": "Funktionen",
+      "mathMacros": {
+        "description": "LaTeX-Makros",
+        "placeholder": "\\R = \\mathbb{R}",
+        "notes": "Ein Makro pro Zeile. Beispiel: \\norm = \\left\\lVert #1 \\right\\rVert"
       }
     },
     "spelling": {

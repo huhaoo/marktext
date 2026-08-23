@@ -405,10 +405,12 @@
         "view": "ビュー",
         "searcher": "検索",
         "watcher": "ウォッチャー",
+        "features": "機能",
         "spelling": "スペリング",
         "custom css": "カスタムCSS"
       },
       "items": {
+        "mathMacros": "LaTeX マクロ",
         "autoSave": "編集中のコンテンツを自動保存",
         "autoSaveDelay": "変更後にファイルが保存されるまでの時間（ミリ秒）",
         "autoNormalizeLineEndings": "開くときに改行コードを LF に自動正規化し、オプションで末尾の改行も処理します",
@@ -482,6 +484,7 @@
       "general": "一般",
       "editor": "エディター",
       "markdown": "Markdown",
+      "features": "機能",
       "spelling": "スペルチェック",
       "theme": "テーマ",
       "image": "画像",
@@ -806,6 +809,14 @@
         "orderListDelimiter": "番号付きリスト区切り文字",
         "preferLooseListItem": "ルーズリストアイテムを優先",
         "title": "リスト"
+      }
+    },
+    "features": {
+      "title": "機能",
+      "mathMacros": {
+        "description": "LaTeX マクロ",
+        "placeholder": "\\R = \\mathbb{R}",
+        "notes": "1 行に 1 つのマクロを定義します。例: \\norm = \\left\\lVert #1 \\right\\rVert"
       }
     },
     "spelling": {

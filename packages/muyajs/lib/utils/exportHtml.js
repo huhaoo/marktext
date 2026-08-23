@@ -11,6 +11,7 @@ import footerHeaderCss from '../assets/styles/headerFooterStyle.css?inline'
 import { EXPORT_DOMPURIFY_CONFIG } from '../config'
 import { sanitize, unescapeHTML } from '../utils'
 import { validEmoji } from '../ui/emojis'
+import { parseMathMacros } from './mathMacros'
 
 export const getSanitizeHtml = (markdown, options) => {
   const html = marked(markdown, options)
@@ -118,8 +119,10 @@ class ExportHtml {
     this.mathRendererCalled = true
 
     try {
+      const macros = this.muya ? parseMathMacros(this.muya.options.mathMacros) : {}
       return katex.renderToString(math, {
-        displayMode
+        displayMode,
+        macros
       })
     } catch (err) {
       return displayMode

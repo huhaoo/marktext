@@ -122,6 +122,25 @@ MarkText is an open-source Markdown editor powered by the support of its communi
 - Various editing modes: **Source Code mode**, **Typewriter mode**, **Focus mode**.
 - Paste images directly from clipboard.
 
+## Personal modification (huhaoo)
+
+This `master` branch is based on the stable MarkText `v0.19.1` release and
+contains the following personal changes:
+
+- **Automatic settings copy**: the personal Windows package can copy the
+  existing official MarkText settings on first installation.
+- **LaTeX macros**: configure definitions in **Preferences > Features > LaTeX
+  macros**. They are passed to KaTeX only for inline/display math and are also
+  used by HTML export.
+- **Personal modification**: this is a personal build and is maintained
+  separately from the official MarkText project.
+
+See the [LaTeX macros guide](docs/math-macros.md) and the
+[implementation/update guide](docs/math-macros-implementation.md). For
+downloads, use this repository's [Releases](https://github.com/huhaoo/marktext/releases)
+page; the official MarkText releases remain available at
+[marktext/marktext Releases](https://github.com/marktext/marktext/releases).
+
 ## Download and Installation
 
 ![platform](https://img.shields.io/static/v1.svg?label=Platform&message=Linux%20x64%20|%20macOS%20x64%2Farm64%20|%20Windows%20x64%2Farm64&style=for-the-badge)

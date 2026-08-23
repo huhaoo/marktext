@@ -3,6 +3,36 @@
 ;======================================================================
 ; customInstall macro is invoked by electron-builder after files are in $INSTDIR
 !macro customInstall
+  ; Keep the personal build separate from the official app, but seed it with
+  ; the official user's settings on the first installation only.
+  IfFileExists "$INSTDIR\marktext-user-data\.official-settings-copied" SkipSettingsCopy
+  CreateDirectory "$INSTDIR\marktext-user-data"
+  IfFileExists "$APPDATA\marktext\preferences.json" CopySettingsPreference
+    Goto SkipSettingsPreference
+  CopySettingsPreference:
+    CopyFiles /SILENT "$APPDATA\marktext\preferences.json" "$INSTDIR\marktext-user-data"
+  SkipSettingsPreference:
+  IfFileExists "$APPDATA\marktext\Local Storage" CopySettingsStorage
+    Goto SkipSettingsStorage
+  CopySettingsStorage:
+    CreateDirectory "$INSTDIR\marktext-user-data\Local Storage"
+    CopyFiles /SILENT "$APPDATA\marktext\Local Storage\*" "$INSTDIR\marktext-user-data\Local Storage"
+  SkipSettingsStorage:
+  IfFileExists "$APPDATA\marktext\window-state.json" CopySettingsWindow
+    Goto SkipSettingsWindow
+  CopySettingsWindow:
+    CopyFiles /SILENT "$APPDATA\marktext\window-state.json" "$INSTDIR\marktext-user-data"
+  SkipSettingsWindow:
+  IfFileExists "$APPDATA\marktext\recently-used-documents.json" CopySettingsRecent
+    Goto SkipSettingsRecent
+  CopySettingsRecent:
+    CopyFiles /SILENT "$APPDATA\marktext\recently-used-documents.json" "$INSTDIR\marktext-user-data"
+  SkipSettingsRecent:
+  FileOpen $0 "$INSTDIR\marktext-user-data\.official-settings-copied" w
+  FileWrite $0 "Settings copied from %APPDATA%\\marktext.$\r$\n"
+  FileClose $0
+SkipSettingsCopy:
+
   ; Ask the user if they want to register file associations
   MessageBox MB_YESNO|MB_ICONQUESTION \
   "Do you want to associate Markdown files (.md, .markdown, .mmd, .mdown, .mdtext, .mdx) with MarkText?" /SD IDNO IDNO SkipAssoc
