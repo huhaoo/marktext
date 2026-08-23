@@ -62,6 +62,12 @@ does not require administrator permission. The separate directory prevents
 the fork from sharing MarkText's single-instance lock and preferences with an
 official installation.
 
+On the first installation only, `scripts/prepare-setup-staging.mjs` generates
+an installer script that copies `preferences.json`, the Chromium Local Storage
+database (which contains the `latex-alias` values), and small window/recent-file
+state files from `%APPDATA%\marktext`. A marker file prevents later installs
+from overwriting settings already created by the personal build.
+
 The official Windows package keeps several runtime packages in
 `resources/app.asar.unpacked/node_modules`. The local `app/` tree used by the
 small ASAR packer also needs their JavaScript package files, so synchronize
