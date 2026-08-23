@@ -128,7 +128,8 @@ This `master` branch is based on the stable MarkText `v0.19.1` release and
 contains the following personal changes:
 
 - **Automatic settings copy**: the personal Windows package can copy the
-  existing official MarkText settings on first installation.
+  existing official MarkText settings on first installation and preserves the
+  personal settings across upgrades and reinstallations.
 - **LaTeX macros**: configure definitions in **Preferences > Features > LaTeX
   macros**. They are passed to KaTeX only for inline/display math and are also
   used by HTML export.

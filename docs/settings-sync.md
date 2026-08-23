@@ -24,9 +24,9 @@ Because `dataCenter` contains local paths and image/upload history, review the
 contents and access level of the Gist before sharing it. A private Gist is created
 by default. Downloading first writes a backup under the local
 `settings-sync-backups` directory. Matching values are then applied to the current
-installation; unknown values are ignored so a bundle from a newer build does not
-add unsupported settings. Restart MarkText if a downloaded custom shortcut is not
-active immediately.
+installation; unknown values and electron-store's `__internal__` field are
+ignored so a bundle from a newer build does not add unsupported settings. Restart
+MarkText if a downloaded custom shortcut is not active immediately.
 
 ## Bundle format
 

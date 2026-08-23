@@ -11,6 +11,7 @@ import type { IUserPreferences } from '@shared/types/preferences'
 import schema from './schema.json'
 
 const PREFERENCES_FILE_NAME = 'preferences'
+const PERSONAL_PREFERENCE_KEYS = ['mathMacros']
 
 // The Preference class extends EventEmitter but does not currently emit any
 // events itself — keep the event map empty until concrete events are added.
@@ -94,6 +95,19 @@ class Preference extends TypedEmitter<PreferenceEvents> {
       // Because `this.getAll()` will return a plainObject, so we can not use `hasOwnProperty` method
       // const plainObject = () => Object.create(null)
       const userSetting = this.getAll() as Record<string, unknown>
+
+      // Keep personal preferences when an upstream default file does not know
+      // about a feature added by this fork. Otherwise the cleanup below would
+      // delete the value on the first launch after an update.
+      for (const key of PERSONAL_PREFERENCE_KEYS) {
+        if (
+          Object.prototype.hasOwnProperty.call(userSetting, key) &&
+          !Object.prototype.hasOwnProperty.call(defaultSettings, key)
+        ) {
+          defaultSettings[key] = userSetting[key]
+        }
+      }
+
       // Update outdated settings
       const requiresUpdate = !hasSameKeys(defaultSettings, userSetting)
       const userSettingKeys = Object.keys(userSetting)

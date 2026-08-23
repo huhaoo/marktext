@@ -1,12 +1,17 @@
 ; installer.nsh — include via electron-builder’s nsis.include
+!define PERSONAL_SETTINGS_BACKUP "$APPDATA\marktext-huhaoo"
 
 ;======================================================================
 ; customInstall macro is invoked by electron-builder after files are in $INSTDIR
 !macro customInstall
-  ; Keep the personal build separate from the official app, but seed it with
-  ; the official user's settings on the first installation only.
-  IfFileExists "$INSTDIR\marktext-user-data\.official-settings-copied" SkipSettingsCopy
+  ; Keep the personal build separate from the official app. Never overwrite
+  ; an existing personal preferences file during an update or reinstall.
+  IfFileExists "$INSTDIR\marktext-user-data\preferences.json" PreserveExistingSettings
   CreateDirectory "$INSTDIR\marktext-user-data"
+
+  ; Restore data saved by the previous personal installation before falling
+  ; back to the official user's settings.
+  IfFileExists "${PERSONAL_SETTINGS_BACKUP}\preferences.json" RestorePersonalSettings
   IfFileExists "$APPDATA\marktext\preferences.json" CopySettingsPreference
     Goto SkipSettingsPreference
   CopySettingsPreference:
@@ -28,9 +33,50 @@
   CopySettingsRecent:
     CopyFiles /SILENT "$APPDATA\marktext\recently-used-documents.json" "$INSTDIR\marktext-user-data"
   SkipSettingsRecent:
+  Goto FinishSettingsCopy
+
+  RestorePersonalSettings:
+    CopyFiles /SILENT "${PERSONAL_SETTINGS_BACKUP}\preferences.json" "$INSTDIR\marktext-user-data"
+    IfFileExists "${PERSONAL_SETTINGS_BACKUP}\dataCenter.json" RestoreDataCenter
+      Goto RestoreKeybindings
+  RestoreDataCenter:
+    CopyFiles /SILENT "${PERSONAL_SETTINGS_BACKUP}\dataCenter.json" "$INSTDIR\marktext-user-data"
+  RestoreKeybindings:
+    IfFileExists "${PERSONAL_SETTINGS_BACKUP}\keybindings.json" CopyKeybindings
+      Goto RestoreSettingsSync
+  CopyKeybindings:
+    CopyFiles /SILENT "${PERSONAL_SETTINGS_BACKUP}\keybindings.json" "$INSTDIR\marktext-user-data"
+  RestoreSettingsSync:
+    IfFileExists "${PERSONAL_SETTINGS_BACKUP}\settingsSync.json" CopySettingsSync
+      Goto FinishSettingsCopy
+  CopySettingsSync:
+    CopyFiles /SILENT "${PERSONAL_SETTINGS_BACKUP}\settingsSync.json" "$INSTDIR\marktext-user-data"
+
+  FinishSettingsCopy:
   FileOpen $0 "$INSTDIR\marktext-user-data\.official-settings-copied" w
-  FileWrite $0 "Settings copied from %APPDATA%\\marktext.$\r$\n"
+  FileWrite $0 "Personal settings preserved or copied.$\r$\n"
   FileClose $0
+  Goto SkipSettingsCopy
+
+  PreserveExistingSettings:
+    ; Seed the persistent backup before an upgrade can replace the install
+    ; directory. This also covers upgrades from the previous installer.
+    CreateDirectory "${PERSONAL_SETTINGS_BACKUP}"
+    CopyFiles /SILENT "$INSTDIR\marktext-user-data\preferences.json" "${PERSONAL_SETTINGS_BACKUP}"
+    IfFileExists "$INSTDIR\marktext-user-data\dataCenter.json" BackupExistingDataCenter
+      Goto BackupExistingKeybindings
+  BackupExistingDataCenter:
+    CopyFiles /SILENT "$INSTDIR\marktext-user-data\dataCenter.json" "${PERSONAL_SETTINGS_BACKUP}"
+  BackupExistingKeybindings:
+    IfFileExists "$INSTDIR\marktext-user-data\keybindings.json" CopyExistingKeybindings
+      Goto BackupExistingSettingsSync
+  CopyExistingKeybindings:
+    CopyFiles /SILENT "$INSTDIR\marktext-user-data\keybindings.json" "${PERSONAL_SETTINGS_BACKUP}"
+  BackupExistingSettingsSync:
+    IfFileExists "$INSTDIR\marktext-user-data\settingsSync.json" CopyExistingSettingsSync
+      Goto SkipSettingsCopy
+  CopyExistingSettingsSync:
+    CopyFiles /SILENT "$INSTDIR\marktext-user-data\settingsSync.json" "${PERSONAL_SETTINGS_BACKUP}"
 SkipSettingsCopy:
 
   ; Ask the user if they want to register file associations
@@ -59,6 +105,29 @@ SkipAssoc:
 ;======================================================================
 ; customUnInstall macro cleans up on uninstall
 !macro customUnInstall
+  ; Keep personal settings outside the installation directory so a full
+  ; uninstall followed by a reinstall does not lose LaTeX macros or sync IDs.
+  IfFileExists "$INSTDIR\marktext-user-data\preferences.json" BackupPersonalSettings
+    Goto AskDeleteSettings
+  BackupPersonalSettings:
+    CreateDirectory "${PERSONAL_SETTINGS_BACKUP}"
+    CopyFiles /SILENT "$INSTDIR\marktext-user-data\preferences.json" "${PERSONAL_SETTINGS_BACKUP}"
+    IfFileExists "$INSTDIR\marktext-user-data\dataCenter.json" BackupDataCenter
+      Goto BackupKeybindings
+  BackupDataCenter:
+    CopyFiles /SILENT "$INSTDIR\marktext-user-data\dataCenter.json" "${PERSONAL_SETTINGS_BACKUP}"
+  BackupKeybindings:
+    IfFileExists "$INSTDIR\marktext-user-data\keybindings.json" CopyBackupKeybindings
+      Goto BackupSettingsSync
+  CopyBackupKeybindings:
+    CopyFiles /SILENT "$INSTDIR\marktext-user-data\keybindings.json" "${PERSONAL_SETTINGS_BACKUP}"
+  BackupSettingsSync:
+    IfFileExists "$INSTDIR\marktext-user-data\settingsSync.json" CopyBackupSettingsSync
+      Goto AskDeleteSettings
+  CopyBackupSettingsSync:
+    CopyFiles /SILENT "$INSTDIR\marktext-user-data\settingsSync.json" "${PERSONAL_SETTINGS_BACKUP}"
+
+  AskDeleteSettings:
   ; Delete the open command subtree
   DeleteRegKey HKCU "Software\Classes\MarkText.Document\shell\open\command"
   DeleteRegKey HKCU "Software\Classes\MarkText.Document\shell\open"
@@ -80,5 +149,6 @@ SkipAssoc:
   MessageBox MB_YESNO "Do you want to delete user settings?" /SD IDNO IDNO SkipRemoval
     SetShellVarContext current
     RMDir /r "$APPDATA\marktext"
+    RMDir /r "${PERSONAL_SETTINGS_BACKUP}"
   SkipRemoval:
 !macroend

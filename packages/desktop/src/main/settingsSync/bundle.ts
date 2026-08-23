@@ -1,5 +1,6 @@
 export const SETTINGS_SYNC_FORMAT_VERSION = 1
 export const SETTINGS_SYNC_FILE_NAME = 'marktext-settings.json'
+export const SETTINGS_SYNC_INTERNAL_KEY = '__internal__'
 
 export interface SettingsSyncBundle {
   formatVersion: typeof SETTINGS_SYNC_FORMAT_VERSION
@@ -13,6 +14,12 @@ const isRecord = (value: unknown): value is Record<string, unknown> => {
   return value !== null && typeof value === 'object' && !Array.isArray(value)
 }
 
+const omitInternalKeys = (value: Record<string, unknown>): Record<string, unknown> => {
+  return Object.fromEntries(
+    Object.entries(value).filter(([key]) => key !== SETTINGS_SYNC_INTERNAL_KEY)
+  )
+}
+
 export const createSettingsSyncBundle = (
   preferences: Record<string, unknown>,
   dataCenter: Record<string, unknown>,
@@ -20,8 +27,8 @@ export const createSettingsSyncBundle = (
 ): SettingsSyncBundle => ({
   formatVersion: SETTINGS_SYNC_FORMAT_VERSION,
   product: 'marktext',
-  preferences: { ...preferences },
-  dataCenter: { ...dataCenter },
+  preferences: omitInternalKeys(preferences),
+  dataCenter: omitInternalKeys(dataCenter),
   keybindings: keybindings instanceof Map ? Object.fromEntries(keybindings) : { ...keybindings }
 })
 
@@ -56,8 +63,8 @@ export const parseSettingsSyncBundle = (value: unknown): SettingsSyncBundle => {
   return {
     formatVersion: SETTINGS_SYNC_FORMAT_VERSION,
     product: 'marktext',
-    preferences: { ...value.preferences },
-    dataCenter: { ...value.dataCenter },
+    preferences: omitInternalKeys(value.preferences),
+    dataCenter: omitInternalKeys(value.dataCenter),
     keybindings
   }
 }

@@ -40,9 +40,10 @@ from the feature code, so upstream source updates remain easy to review.
 
 The Windows NSIS installer keeps the personal build's data separate from the
 official installation. `packages/desktop/build/windows/installer.nsh` copies
-the official `%APPDATA%\marktext` preference file and selected supporting data
-into `$INSTDIR\marktext-user-data` once, guarded by
-`.official-settings-copied`. The existing portable-data detection in
-`packages/desktop/src/main/cli/index.ts` then makes the installed personal
-build use that directory. Reinstalling the personal build does not overwrite
-its existing settings.
+the official `%APPDATA%\marktext` preference file only when the personal
+preference file does not already exist. On an upgrade it first backs up the
+existing personal files; before a full uninstall it does the same under
+`%APPDATA%\marktext-huhaoo`. A later installation restores that backup before
+using the official settings as a fallback. This keeps LaTeX macros across
+upgrade/uninstall/reinstall cycles while preserving the existing
+portable-data detection in `packages/desktop/src/main/cli/index.ts`.

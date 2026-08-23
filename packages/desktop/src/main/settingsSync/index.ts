@@ -16,6 +16,7 @@ import {
   createSettingsSyncBundle,
   parseSettingsSyncBundle,
   SETTINGS_SYNC_FILE_NAME,
+  SETTINGS_SYNC_INTERNAL_KEY,
   type SettingsSyncBundle
 } from './bundle'
 
@@ -211,7 +212,11 @@ class SettingsSync {
     source: Record<string, unknown>,
     knownKeys: Set<string>
   ): Record<string, unknown> {
-    return Object.fromEntries(Object.entries(source).filter(([key]) => knownKeys.has(key)))
+    return Object.fromEntries(
+      Object.entries(source).filter(
+        ([key]) => key !== SETTINGS_SYNC_INTERNAL_KEY && knownKeys.has(key)
+      )
+    )
   }
 
   private async _getFileContent(file: GithubGistFile, token: string): Promise<string> {
