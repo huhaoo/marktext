@@ -406,7 +406,8 @@
         "watcher": "Watcher",
         "features": "Features",
         "spelling": "Spelling",
-        "custom css": "Custom CSS"
+        "custom css": "Custom CSS",
+        "sync": "Sync"
       },
       "items": {
         "mathMacros": "LaTeX macros",
@@ -486,7 +487,8 @@
       "spelling": "Spelling",
       "theme": "Theme",
       "image": "Image",
-      "keybindings": "Keybindings"
+      "keybindings": "Keybindings",
+      "sync": "Sync"
     },
     "general": {
       "title": "General",
@@ -815,6 +817,27 @@
         "placeholder": "\\R = \\mathbb{R}",
         "notes": "One definition per line. Example: \\norm = \\left\\lVert #1 \\right\\rVert"
       }
+    },
+    "sync": {
+      "title": "Settings sync",
+      "description": "Manually upload or download MarkText settings with a GitHub Gist.",
+      "gistId": "Gist ID or URL",
+      "gistIdPlaceholder": "Leave empty to create a new private Gist",
+      "token": "GitHub token",
+      "tokenPlaceholder": "A token with Gist write permission",
+      "tokenNotes": "The token is stored in the operating system credential store. It is required for upload and private Gist download.",
+      "save": "Save",
+      "clearToken": "Clear token",
+      "saved": "Sync settings saved",
+      "tokenCleared": "GitHub token cleared",
+      "upload": "Upload",
+      "download": "Download",
+      "gistLink": "Gist:",
+      "uploadSuccess": "Settings uploaded",
+      "downloadSuccess": "Settings downloaded",
+      "backupCreated": "A local backup was created at",
+      "errorTitle": "Settings sync failed",
+      "contentsNotes": "The sync package includes preferences, dataCenter (including image paths and uploader data), and custom keybindings. Downloading replaces matching local values; custom keybindings may require restarting MarkText."
     },
     "spelling": {
       "title": "Spelling",

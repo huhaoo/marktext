@@ -105,7 +105,7 @@ MarkText is an open-source Markdown editor powered by the support of its communi
 **Special Sponsor**
 
 | [<img src="docs/assets/sponsors/serpapi.png" width="150">](https://serpapi.com/?utm_source=marktext) | [Scrape Google and other search engines from our fast, easy, and complete API.](https://serpapi.com/?utm_source=marktext) |
-| ------------- |:-------------|
+| ---------------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------ |
 
 ## Screenshot
 
@@ -132,21 +132,27 @@ contains the following personal changes:
 - **LaTeX macros**: configure definitions in **Preferences > Features > LaTeX
   macros**. They are passed to KaTeX only for inline/display math and are also
   used by HTML export.
+- **GitHub Gist settings sync**: **Preferences > Sync** can manually upload or
+  download preferences, `dataCenter` (including relative-image paths and uploader
+  data), and custom keybindings. The GitHub token is kept in the operating system
+  credential store.
 - **Personal modification**: this is a personal build and is maintained
   separately from the official MarkText project.
 
 See the [LaTeX macros guide](docs/math-macros.md) and the
-[implementation/update guide](docs/math-macros-implementation.md). For
+[implementation/update guide](docs/math-macros-implementation.md), as well as the
+[settings sync guide](docs/settings-sync.md). For
 downloads, use this repository's [Releases](https://github.com/huhaoo/marktext/releases)
 page; the official MarkText releases remain available at
 [marktext/marktext Releases](https://github.com/marktext/marktext/releases).
+The settings-sync feature is released as `v0.19.1-0.1` in this personal repository.
 
 ## Download and Installation
 
 ![platform](https://img.shields.io/static/v1.svg?label=Platform&message=Linux%20x64%20|%20macOS%20x64%2Farm64%20|%20Windows%20x64%2Farm64&style=for-the-badge)
 
-| ![](https://raw.githubusercontent.com/wiki/ryanoasis/nerd-fonts/screenshots/v1.0.x/mac-pass-sm.png)                                                                                         | ![](https://raw.githubusercontent.com/wiki/ryanoasis/nerd-fonts/screenshots/v1.0.x/windows-pass-sm.png)                                                                                         | ![](https://raw.githubusercontent.com/wiki/ryanoasis/nerd-fonts/screenshots/v1.0.x/linux-pass-sm.png)                                                                                                       |
-|:-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------:|:-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------:|:-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------:|
+|               ![](https://raw.githubusercontent.com/wiki/ryanoasis/nerd-fonts/screenshots/v1.0.x/mac-pass-sm.png)               |               ![](https://raw.githubusercontent.com/wiki/ryanoasis/nerd-fonts/screenshots/v1.0.x/windows-pass-sm.png)               |              ![](https://raw.githubusercontent.com/wiki/ryanoasis/nerd-fonts/screenshots/v1.0.x/linux-pass-sm.png)              |
+| :-----------------------------------------------------------------------------------------------------------------------------: | :---------------------------------------------------------------------------------------------------------------------------------: | :-----------------------------------------------------------------------------------------------------------------------------: |
 | [![Download for macOS](https://img.shields.io/badge/macOS-Download-blue)](https://github.com/marktext/marktext/releases/latest) | [![Download for Windows](https://img.shields.io/badge/Windows-Download-blue)](https://github.com/marktext/marktext/releases/latest) | [![Download for Linux](https://img.shields.io/badge/Linux-Download-blue)](https://github.com/marktext/marktext/releases/latest) |
 
 Want to see new features of the latest version? Please refer to [CHANGELOG](https://marktext.me/docs/changelog).

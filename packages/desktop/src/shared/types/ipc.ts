@@ -32,6 +32,7 @@ import type {
 } from './files'
 import type { BufferedState as BufferedStateType } from './bufferedState'
 import type { MenuTemplate, MenuPopupPosition } from './menu'
+import type { SettingsSyncConfig, SettingsSyncResult, SettingsSyncState } from './settingsSync'
 
 // =================================================================
 // Invoke channels (renderer → main, returns Promise<T>)
@@ -72,6 +73,13 @@ export interface IpcInvokeChannels {
   'mt::rg::start': { args: [req: unknown]; ret: { searchId: string } }
   'mt::shell::open-external': { args: [url: string]; ret: void }
   'mt::shell::open-path': { args: [fullPath: string]; ret: string }
+  'mt::settings-sync::configure': {
+    args: [config: SettingsSyncConfig]
+    ret: SettingsSyncState
+  }
+  'mt::settings-sync::download': { args: []; ret: SettingsSyncResult }
+  'mt::settings-sync::get-state': { args: []; ret: SettingsSyncState }
+  'mt::settings-sync::upload': { args: []; ret: SettingsSyncResult }
   'mt::spellchecker-get-available-dictionaries': { args: []; ret: string[] }
   'mt::spellchecker-get-custom-dictionary-words': { args: []; ret: string[] }
   'mt::spellchecker-remove-word': { args: [word: string]; ret: boolean }
@@ -130,7 +138,9 @@ export interface IpcSendChannels {
   'mt::open-file-by-window-id': [windowId: number, filePath: string, options?: unknown]
   'mt::open-keybindings-config': []
   'mt::open-setting-window': []
-  'mt::rename': [payload: { id: string; pathname: string; newPathname: string; currentFile?: unknown }]
+  'mt::rename': [
+    payload: { id: string; pathname: string; newPathname: string; currentFile?: unknown }
+  ]
   'mt::request-keybindings': []
   'mt::response-export': [
     payload: {

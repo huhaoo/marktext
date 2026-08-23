@@ -3,6 +3,7 @@ import Preference from '../preferences'
 import EditorBufferStore from '../editorBufferStore'
 import DataCenter from '../dataCenter'
 import Keybindings from '../keyboard/shortcutHandler'
+import SettingsSync from '../settingsSync'
 import AppMenu from '../menu'
 import { loadMenuCommands } from '../menu/actions'
 import { CommandManager, loadDefaultCommands } from '../commands'
@@ -22,6 +23,7 @@ class Accessor {
   public commandManager: any
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public keybindings: any
+  public settingsSync: SettingsSync
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public menu: any
   public windowManager: WindowManager
@@ -43,6 +45,12 @@ class Accessor {
     this._loadCommands()
 
     this.keybindings = new Keybindings(this.commandManager, appEnvironment)
+    this.settingsSync = new SettingsSync(
+      this.preferences,
+      this.dataCenter,
+      this.keybindings,
+      userDataPath
+    )
     this.menu = new AppMenu(this.preferences, this.keybindings, userDataPath)
     this.windowManager = new WindowManager(this.menu, this.preferences, this.editorBufferStore)
   }

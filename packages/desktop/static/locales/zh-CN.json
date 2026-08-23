@@ -407,7 +407,8 @@
         "watcher": "监听器",
         "features": "功能",
         "spelling": "拼写",
-        "custom css": "自定义 CSS"
+        "custom css": "自定义 CSS",
+        "sync": "同步"
       },
       "items": {
         "mathMacros": "LaTeX 宏",
@@ -488,7 +489,8 @@
       "spelling": "拼写",
       "theme": "主题",
       "image": "图片",
-      "keybindings": "快捷键"
+      "keybindings": "快捷键",
+      "sync": "同步"
     },
     "general": {
       "title": "通用",
@@ -817,6 +819,27 @@
         "placeholder": "\\R = \\mathbb{R}",
         "notes": "每行定义一个宏。例如：\\norm = \\left\\lVert #1 \\right\\rVert"
       }
+    },
+    "sync": {
+      "title": "设置同步",
+      "description": "使用 GitHub Gist 手动上传或下载 MarkText 设置。",
+      "gistId": "Gist ID 或 URL",
+      "gistIdPlaceholder": "留空则创建新的私有 Gist",
+      "token": "GitHub token",
+      "tokenPlaceholder": "需要具有 Gist 写入权限的 token",
+      "tokenNotes": "token 会保存到操作系统凭据存储中。上传和下载私有 Gist 时需要 token。",
+      "save": "保存",
+      "clearToken": "清除 token",
+      "saved": "同步设置已保存",
+      "tokenCleared": "GitHub token 已清除",
+      "upload": "上传",
+      "download": "下载",
+      "gistLink": "Gist：",
+      "uploadSuccess": "设置已上传",
+      "downloadSuccess": "设置已下载",
+      "backupCreated": "本地备份已创建：",
+      "errorTitle": "设置同步失败",
+      "contentsNotes": "同步包包含偏好设置、dataCenter（包括图片路径和上传器数据）以及自定义快捷键。下载会替换本地对应项目；自定义快捷键可能需要重启 MarkText 才能完全生效。"
     },
     "spelling": {
       "title": "拼写",

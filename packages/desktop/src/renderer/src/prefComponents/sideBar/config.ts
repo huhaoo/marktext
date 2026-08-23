@@ -6,7 +6,8 @@ import {
   Picture as ImageIcon,
   Reading as SpellIcon,
   Operation as KeyBindingIcon,
-  SetUp as FeaturesIcon
+  SetUp as FeaturesIcon,
+  Refresh as SyncIcon
 } from '@element-plus/icons-vue'
 
 import preferences from '../../../../main/preferences/schema.json'
@@ -114,12 +115,20 @@ export const getCategory = (): PrefCategory[] => [
     label: 'keybindings',
     icon: KeyBindingIcon,
     path: '/preference/keybindings'
+  },
+  {
+    name: t('preferences.categories.sync'),
+    label: 'sync',
+    icon: SyncIcon,
+    path: '/preference/sync'
   }
 ]
 
 const errMessage = (e: unknown): string => (e instanceof Error ? e.message : String(e))
 
-const resolveGlobal = (container: VueI18nGlobalContainer | undefined): VueI18nGlobal | undefined => {
+const resolveGlobal = (
+  container: VueI18nGlobalContainer | undefined
+): VueI18nGlobal | undefined => {
   if (!container) return undefined
   return typeof container.global === 'function' ? container.global() : container.global
 }
@@ -173,7 +182,8 @@ export const getTranslatedSearchContent: CachedTranslator = (() => {
         'spelling',
         'theme',
         'image',
-        'keybindings'
+        'keybindings',
+        'sync'
       ]
       if (!validRoutes.includes(routeCategory)) routeCategory = 'general'
 

@@ -75,7 +75,7 @@ class DataCenter extends TypedEmitter<DataCenterEvents> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   async getAll(): Promise<Record<string, any>> {
     const { serviceName, encryptKeys } = this
-    const data = this.store.store
+    const data = { ...this.store.store }
     try {
       const encryptData = await Promise.all(
         encryptKeys.map((key) => {
@@ -157,15 +157,13 @@ class DataCenter extends TypedEmitter<DataCenterEvents> {
    * Change multiple setting entries.
    */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  setItems(settings: Record<string, any>): void {
+  async setItems(settings: Record<string, any>): Promise<void> {
     if (!settings) {
       log.error('Cannot change settings without entires: object is undefined or null.')
       return
     }
 
-    Object.keys(settings).forEach((key) => {
-      this.setItem(key, settings[key])
-    })
+    await Promise.all(Object.keys(settings).map((key) => this.setItem(key, settings[key])))
   }
 
   _listenForIpcMain(): void {

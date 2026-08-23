@@ -12,6 +12,7 @@ import Theme from '@/prefComponents/theme/index.vue'
 import Image from '@/prefComponents/image/index.vue'
 import Keybindings from '@/prefComponents/keybindings/index.vue'
 import Features from '@/prefComponents/features/index.vue'
+import Sync from '@/prefComponents/sync/index.vue'
 
 const parseSettingsPage = (type: string | null | undefined): string => {
   let pageUrl = '/preference'
@@ -19,6 +20,8 @@ const parseSettingsPage = (type: string | null | undefined): string => {
     pageUrl += '/spelling'
   } else if (type && /\/features$/.test(type)) {
     pageUrl += '/features'
+  } else if (type && /\/sync$/.test(type)) {
+    pageUrl += '/sync'
   }
   return pageUrl
 }
@@ -64,6 +67,11 @@ const routes = (type: string | null | undefined): RouteRecordRaw[] => [
         path: 'features',
         component: Features,
         name: 'features'
+      },
+      {
+        path: 'sync',
+        component: Sync,
+        name: 'sync'
       },
       {
         path: 'theme',
