@@ -825,6 +825,7 @@
       "gistIdPlaceholder": "Leave empty to create a new private Gist",
       "token": "GitHub token",
       "tokenPlaceholder": "A token with Gist write permission",
+      "tokenSaved": "******** (saved; enter a new token to replace it)",
       "tokenNotes": "The token is stored in the operating system credential store. It is required for upload and private Gist download.",
       "save": "Save",
       "clearToken": "Clear token",

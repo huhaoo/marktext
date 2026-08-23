@@ -21,7 +21,9 @@
         type="password"
         show-password
         autocomplete="off"
-        :placeholder="t('preferences.sync.tokenPlaceholder')"
+        :placeholder="
+          state.hasToken ? t('preferences.sync.tokenSaved') : t('preferences.sync.tokenPlaceholder')
+        "
       />
       <div class="notes">
         {{ t('preferences.sync.tokenNotes') }}

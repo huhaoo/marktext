@@ -827,6 +827,7 @@
       "gistIdPlaceholder": "留空则创建新的私有 Gist",
       "token": "GitHub token",
       "tokenPlaceholder": "需要具有 Gist 写入权限的 token",
+      "tokenSaved": "********（已保存；输入新 token 可替换）",
       "tokenNotes": "token 会保存到操作系统凭据存储中。上传和下载私有 Gist 时需要 token。",
       "save": "保存",
       "clearToken": "清除 token",
