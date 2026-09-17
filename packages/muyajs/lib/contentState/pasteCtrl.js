@@ -249,10 +249,116 @@ const pasteCtrl = (ContentState) => {
     return null
   }
 
+  // Parse the given markdown text into a two dimensional array of cell texts
+  // if the text consists of exactly one markdown table, otherwise return null.
+  ContentState.prototype.getMarkdownTableMatrix = function(text) {
+    if (!text || !text.includes('|')) {
+      return null
+    }
+
+    const stateFragments = this.markdownToState(text)
+    if (stateFragments.length !== 1) {
+      return null
+    }
+
+    const figure = stateFragments[0]
+    if (figure.type !== 'figure' || figure.functionType !== 'table') {
+      return null
+    }
+
+    const cellMatrix = []
+    for (const rowContainer of figure.children[0].children) {
+      for (const row of rowContainer.children) {
+        cellMatrix.push(row.children.map((cell) => cell.children[0].text))
+      }
+    }
+    return cellMatrix.length ? cellMatrix : null
+  }
+
+  // Paste a markdown table into an existing table on `normal` paste. The
+  // copied table keeps its shape and is anchored at `startBlock` (a `th`/`td`
+  // or cell content block): the cells are filled from left to right and top
+  // to bottom, cells that don't fit into the target table are discarded.
+  // Returns true when the text was pasted as table cells.
+  ContentState.prototype.pasteMarkdownTableAsCells = function(text, startBlock) {
+    if (!startBlock) {
+      return false
+    }
+
+    const cellMatrix = this.getMarkdownTableMatrix(text)
+    if (!cellMatrix) {
+      return false
+    }
+
+    const cellBlock =
+      startBlock.functionType === 'cellContent' ? this.getParent(startBlock) : startBlock
+    const rowBlock = this.getParent(cellBlock)
+    const table = rowBlock ? this.closest(cellBlock, 'table') : null
+    if (!rowBlock || !table) {
+      return false
+    }
+
+    const rows = []
+    for (const rowContainer of table.children) {
+      if (rowContainer.type === 'thead' || rowContainer.type === 'tbody') {
+        rows.push(...rowContainer.children)
+      }
+    }
+
+    const anchorRow = rows.indexOf(rowBlock)
+    const anchorColumn = rowBlock.children.indexOf(cellBlock)
+    if (anchorRow === -1 || anchorColumn === -1) {
+      return false
+    }
+
+    let lastCellContent = null
+    for (let i = 0; i < cellMatrix.length; i++) {
+      const targetRow = rows[anchorRow + i]
+      if (!targetRow) {
+        break // discard the remaining rows
+      }
+      const rowContents = cellMatrix[i]
+      for (let j = 0; j < rowContents.length; j++) {
+        const targetCell = targetRow.children[anchorColumn + j]
+        if (!targetCell) {
+          break // discard the remaining columns
+        }
+        const cellContent = targetCell.children[0]
+        cellContent.text = rowContents[j]
+        lastCellContent = cellContent
+      }
+    }
+
+    if (!lastCellContent) {
+      return false
+    }
+
+    // Deselect the cells and put the cursor at the end of the last filled cell.
+    this.selectedTableCells = null
+    const { key } = lastCellContent
+    const offset = lastCellContent.text.length
+    this.cursor = {
+      start: { key, offset },
+      end: { key, offset },
+      isEdit: true
+    }
+    this.partialRender()
+    this.muya.dispatchSelectionChange()
+    this.muya.dispatchSelectionFormats()
+    this.muya.dispatchChange()
+    return true
+  }
+
   // Handle global events.
-  ContentState.prototype.docPasteHandler = async function(event) {
+  ContentState.prototype.docPasteHandler = async function(event, type = 'normal') {
     // TODO: Pasting into CodeMirror will not work for special data like images
     // or tables (HTML) because it's not handled.
+
+    // `event.clipboardData` may be detached after we yield to the event loop,
+    // so snapshot the plain text synchronously (see `pasteImage`).
+    const text = event.clipboardData
+      ? event.clipboardData.getData('text/plain').replace(/\r/g, '')
+      : ''
 
     const file = await this.pasteImage(event)
     if (file) {
@@ -264,6 +370,12 @@ const pasteCtrl = (ContentState) => {
       const startBlock = this.getBlock(start.key)
       const { selectedTableCells: stc } = this
 
+      // Fill the selected cells with a copied markdown table on `normal` paste.
+      const topLeftCell = this.getBlock(stc.cells[0].key)
+      if (type === 'normal' && topLeftCell && this.pasteMarkdownTableAsCells(text, topLeftCell)) {
+        return event.preventDefault()
+      }
+
       // Exactly one table cell is selected. Replace the cells text via default handler.
       if (
         startBlock &&
@@ -271,7 +383,7 @@ const pasteCtrl = (ContentState) => {
         stc.row === 1 &&
         stc.column === 1
       ) {
-        this.pasteHandler(event)
+        this.pasteHandler(event, type, text)
         return event.preventDefault()
       }
     }
@@ -393,9 +505,21 @@ const pasteCtrl = (ContentState) => {
         if (stc.row === 1 && stc.column === 1) {
           isOneCellSelected = true
         } else {
-          // Cancel event, multiple cells are selected.
+          // Multiple cells are selected. Fill them with a copied markdown
+          // table on `normal` paste, otherwise cancel the event.
+          const topLeftCell = this.getBlock(stc.cells[0].key)
+          if (type === 'normal' && topLeftCell && this.pasteMarkdownTableAsCells(text, topLeftCell)) {
+            return
+          }
           return this.partialRender()
         }
+      }
+
+      // Fill the table cells with a copied markdown table instead of
+      // inserting the raw markdown into one cell. `pasteAsPlainText` keeps
+      // the original behavior.
+      if (type === 'normal' && this.pasteMarkdownTableAsCells(text, startBlock)) {
+        return
       }
 
       const { key } = startBlock
