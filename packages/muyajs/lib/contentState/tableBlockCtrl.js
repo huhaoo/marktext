@@ -417,7 +417,7 @@ const tableBlockCtrl = (ContentState) => {
         end: { key, offset },
         isEdit: true
       }
-    } else {
+    } else if (start && end) {
       this.cursor = {
         start,
         end,

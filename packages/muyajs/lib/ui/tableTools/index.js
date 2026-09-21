@@ -81,7 +81,7 @@ class TableBarTools extends BaseFloat {
     event.stopPropagation()
 
     const { contentState } = this.muya
-    contentState.editTable(item)
+    contentState.editTable(item, this.tableInfo.cellContentKey)
     this.hide()
   }
 }

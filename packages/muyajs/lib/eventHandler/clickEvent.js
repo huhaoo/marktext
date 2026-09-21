@@ -93,10 +93,16 @@ class ClickEvent {
           width: rect.offsetWidth,
           height: rect.offsetHeight
         }
+        // Anchor the row/column operations on the cell that contains the
+        // drag bar, so that they don't depend on the cursor being inside
+        // the table when the float tools are used.
+        const cell = target.closest('th') || target.closest('td')
+        const cellBlock = cell ? contentState.getBlock(cell.id) : null
         eventCenter.dispatch('muya-table-bar', {
           reference,
           tableInfo: {
-            barType: target.classList.contains('left') ? 'left' : 'bottom'
+            barType: target.classList.contains('left') ? 'left' : 'bottom',
+            cellContentKey: cellBlock ? cellBlock.children[0].key : null
           }
         })
       }
