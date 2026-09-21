@@ -217,6 +217,17 @@ const arrowCtrl = (ContentState) => {
       if (nextBlock) {
         key = nextBlock.key
       } else {
+        // Do not create a new empty paragraph if the cursor is already
+        // in an empty paragraph at the end of the document.
+        const parent = this.getParent(block)
+        if (
+          block.type === 'span' &&
+          block.text === '' &&
+          (!block.functionType || block.functionType === 'paragraphContent') &&
+          (!parent || parent.type === 'p')
+        ) {
+          return
+        }
         newBlock = this.createBlockP()
         const lastBlock = this.blocks[this.blocks.length - 1]
         this.insertAfter(newBlock, lastBlock)
