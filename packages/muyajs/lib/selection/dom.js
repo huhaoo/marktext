@@ -54,6 +54,7 @@ export const getOffsetOfParagraph = (node, paragraph) => {
     preSibling = preSibling.previousSibling
     if (preSibling) {
       offset += getTextContent(preSibling, [
+        CLASS_OR_ID.AG_CITATION_RENDER,
         CLASS_OR_ID.AG_MATH_RENDER,
         CLASS_OR_ID.AG_RUBY_RENDER
       ]).length

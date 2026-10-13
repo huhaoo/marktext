@@ -1429,5 +1429,28 @@
     "vega-lite-start": "vega-lite 开始",
     "click-to-add-image": "点击添加图片",
     "load-image-failed": "图片加载失败"
+  },
+  "citations": {
+    "settings": "文献引用设置",
+    "refresh": "刷新文献库",
+    "bibliography": "文献库文件",
+    "pathsHint": "每行一个本地 .bib 路径，相对路径以本文档所在目录为准",
+    "chooseBibliography": "选择 .bib 文件",
+    "style": "引用样式",
+    "customStyle": "本地 CSL 样式",
+    "chooseStyle": "选择 .csl 文件",
+    "sectionTitle": "参考文献标题",
+    "references": "参考文献",
+    "saveHint": "保存文档后，末尾参考文献列表才会更新。",
+    "pending": "引用已更改，保存后更新参考文献。",
+    "loading": "正在加载文献库…",
+    "noMatches": "没有匹配的文献",
+    "invalidBibliography": "请指定至少一个本地文献库文件。",
+    "invalidConfig": "引用配置无效，请检查文档顶部的 YAML 配置。",
+    "fileError": "无法读取引用文件",
+    "localOnly": "请使用本地文献库或 CSL 文件。",
+    "saveFirst": "使用相对文献库路径前，请先保存文档。",
+    "missingKeys": "找不到引用键",
+    "exportFailed": "无法导出文献引用"
   }
 }

@@ -1,6 +1,12 @@
 name: Release MarkText
 
 on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Existing version tag to rebuild (for example v0.20.0-rc.3)'
+        required: true
+        type: string
   push:
     # Broad trigger so the validate job can reject malformed v-tags
     # (e.g. `vbad.tag`) instead of them silently not triggering anything.
@@ -8,29 +14,46 @@ on:
       - 'v*'
 
 concurrency:
-  group: release-${{ github.ref }}
+  group: release-${{ inputs.tag || github.ref_name }}
   cancel-in-progress: false
 
 permissions:
   contents: read
 
 env:
-  MARKTEXT_RELEASE_TAG: ${{ github.ref_name }}
+  MARKTEXT_RELEASE_TAG: ${{ inputs.tag || github.ref_name }}
 
 jobs:
   validate:
-    name: Validate tag
+    name: Validate version and run checks
     runs-on: ubuntu-latest
     steps:
-      - name: Validate semver tag
+      - uses: actions/checkout@v4.3.1
+        with:
+          ref: refs/tags/${{ env.MARKTEXT_RELEASE_TAG }}
+
+      - uses: ./.github/actions/setup
+        with:
+          node-version: '24.14.1'
+
+      - name: Validate semver tag and package versions
         run: |
-          tag="${GITHUB_REF_NAME}"
-          # SemVer 2.0.0 with leading "v"
-          if ! [[ "$tag" =~ ^v(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(-[0-9A-Za-z.-]+)?(\+[0-9A-Za-z.-]+)?$ ]]; then
-            echo "::error::Tag '$tag' is not a valid semver (expected vX.Y.Z[-prerelease][+build])"
-            exit 1
-          fi
-          echo "Tag '$tag' is valid."
+          node <<'NODE'
+          const { SemVer } = require('semver');
+          const tag = process.env.MARKTEXT_RELEASE_TAG;
+          if (!tag.startsWith('v')) throw new Error('Expected a v-prefixed SemVer tag');
+          const version = tag.slice(1);
+          new SemVer(version);
+          for (const file of ['./package.json', './packages/desktop/package.json']) {
+            if (require(file).version !== version) throw new Error(`${file} version does not match ${tag}`);
+          }
+          console.log(`Validated ${tag}`);
+          NODE
+
+      - run: pnpm test:unit
+      - run: pnpm typecheck
+      - run: pnpm lint
+      - run: pnpm validate-licenses
 
   build:
     name: Build (${{ matrix.name }})
@@ -64,6 +87,8 @@ jobs:
     steps:
       - name: Check out Git repository
         uses: actions/checkout@v4.3.1
+        with:
+          ref: refs/tags/${{ env.MARKTEXT_RELEASE_TAG }}
 
       - name: Enable Git long paths on Windows
         if: matrix.platform == 'windows'
@@ -111,6 +136,9 @@ jobs:
           npm_config_user_agent: 'pnpm'
           USE_ELECTRON_CLANG: ${{ matrix.platform == 'linux' && '0' || '' }}
 
+      - name: Generate third-party notices
+        run: pnpm gen-third-party
+
       - name: build-linux
         if: matrix.platform == 'linux'
         run: pnpm run build:linux
@@ -146,6 +174,7 @@ jobs:
             dist/*.dmg
             dist/*.blockmap
             dist/*.yml
+            !dist/builder-debug.yml
             dist/*.AppImage
             dist/*.snap
             dist/*.deb
@@ -163,6 +192,9 @@ jobs:
       contents: write
       actions: read
     steps:
+      - uses: actions/checkout@v4.3.1
+        with:
+          ref: refs/tags/${{ env.MARKTEXT_RELEASE_TAG }}
       # upload-artifact@v4 treats `dist/` as the common-ancestor root and
       # stores files flat inside each artifact (no `dist/` prefix). Downloading
       # with `path: dist` + `merge-multiple` recreates `./dist/<file>` across
@@ -185,9 +217,14 @@ jobs:
 
       - name: Compose release notes body
         env:
-          IS_PRERELEASE: ${{ contains(github.ref_name, '-') }}
+          IS_PRERELEASE: ${{ contains(env.MARKTEXT_RELEASE_TAG, '-') }}
         run: |
           {
+            notes="docs/releases/${MARKTEXT_RELEASE_TAG}.md"
+            if [[ -f "$notes" ]]; then
+              cat "$notes"
+              echo ""
+            fi
             if [[ "$IS_PRERELEASE" == "true" ]]; then
               echo "## ❗ This is a pre-release"
               echo "- May contain bugs and unfinished features."
@@ -206,30 +243,17 @@ jobs:
             echo '```'
           } > release_body.md
 
-      - name: Remove previous release assets
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          if gh release view "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
-            gh release view "$GITHUB_REF_NAME" \
-              --repo "$GITHUB_REPOSITORY" \
-              --json assets \
-              --jq '.assets[].name' \
-              | while IFS= read -r asset; do
-                  [ -z "$asset" ] || gh release delete-asset "$GITHUB_REF_NAME" "$asset" \
-                    --repo "$GITHUB_REPOSITORY" --yes
-                done
-          fi
-
       - name: Publish release
         uses: softprops/action-gh-release@v2.6.2
         with:
           # Publish personal-fork releases immediately so the generated
           # Windows installers are visible on the repository Releases page.
           draft: false
-          prerelease: ${{ contains(github.ref_name, '-') }}
+          prerelease: ${{ contains(env.MARKTEXT_RELEASE_TAG, '-') }}
+          tag_name: ${{ env.MARKTEXT_RELEASE_TAG }}
           generate_release_notes: true
-          name: ${{ github.ref_name }}
+          name: ${{ env.MARKTEXT_RELEASE_TAG }}
+          overwrite_files: true
           body_path: release_body.md
           fail_on_unmatched_files: true
           files: dist/*

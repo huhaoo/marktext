@@ -1,6 +1,6 @@
 import fs from 'fs-extra'
 import { statSync, constants, type Stats } from 'fs'
-import { ipcMain } from 'electron'
+import { ipcMain, dialog, BrowserWindow } from 'electron'
 import { isFile as commonIsFile, isDirectory as commonIsDirectory } from 'common/filesystem'
 
 interface SerializedStat {
@@ -38,6 +38,16 @@ const toBuffer = (data: unknown): unknown => {
 }
 
 export const registerFsHandlers = (): void => {
+  ipcMain.handle('mt::citations::choose-files', async(event, kind: 'bibliography' | 'style') => {
+    if (kind !== 'bibliography' && kind !== 'style') throw new Error('Invalid citation file type')
+    const win = BrowserWindow.fromWebContents(event.sender)
+    if (!win) return []
+    const result = await dialog.showOpenDialog(win, {
+      properties: kind === 'bibliography' ? ['openFile', 'multiSelections'] : ['openFile'],
+      filters: [{ name: kind === 'bibliography' ? 'BibTeX / BibLaTeX' : 'CSL', extensions: kind === 'bibliography' ? ['bib', 'bibtex'] : ['csl'] }]
+    })
+    return result.canceled ? [] : result.filePaths
+  })
   ipcMain.handle('mt::fs::is-file', (_e, p: string) => commonIsFile(p))
   ipcMain.handle('mt::fs::is-directory', (_e, p: string) => commonIsDirectory(p))
   ipcMain.handle('mt::fs::empty-dir', (_e, p: string) => fs.emptyDir(p))

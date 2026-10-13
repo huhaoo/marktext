@@ -258,6 +258,7 @@ export const CLASS_OR_ID = Object.freeze(
     'AG_LOOSE_LIST_ITEM',
     'AG_MATH',
     'AG_MATH_TEXT',
+    'AG_CITATION_RENDER',
     'AG_MATH_RENDER',
     'AG_RUBY',
     'AG_RUBY_TEXT',

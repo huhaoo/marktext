@@ -35,6 +35,18 @@
             {{ copyrightContributors }}
           </div>
         </el-col>
+        <el-col :span="24">
+          <div
+            class="text"
+            style="font-size: 11px"
+          >
+            citeproc-js · © 2009–2019 Frank Bennett · CPAL-1.0
+            <a
+              href="https://github.com/Juris-M/citeproc-js"
+              @click.prevent="openCitationSource"
+            >Source</a>
+          </div>
+        </el-col>
       </el-row>
     </el-dialog>
   </div>
@@ -53,6 +65,7 @@ const name = 'MarkText'
 const copyright = t('about.copyright', { year: new Date().getFullYear() })
 const copyrightContributors = t('about.copyrightContributors')
 const showAboutDialog = ref(false)
+const openCitationSource = () => window.electron.shell.openExternal('https://github.com/Juris-M/citeproc-js')
 
 const store = useMainStore()
 

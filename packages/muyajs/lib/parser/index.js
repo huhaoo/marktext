@@ -2,6 +2,7 @@ import { beginRules, inlineRules, inlineExtensionRules } from './rules'
 import { isLengthEven, union } from '../utils'
 import { findClosingBracket } from './marked/utils'
 import { getAttributes, parseSrcAndTitle, validateEmphasize, lowerPriority } from './utils'
+import { parseCitation } from '../citations/syntax'
 
 // const CAN_NEST_RULES = ['strong', 'em', 'link', 'del', 'a_link', 'reference_link', 'html_tag']
 // disallowed html tags in https://github.github.com/gfm/#raw-html
@@ -216,6 +217,16 @@ const tokenizerFac = (src, beginRules, inlineRules, pos = 0, top, labels, option
       }
     }
     if (inChunk) continue
+    if (options.citations) {
+      const citation = parseCitation(src)
+      if (citation) {
+        pushPending()
+        tokens.push({ type: 'citation', ...citation, parent: tokens, range: { start: pos, end: pos + citation.raw.length } })
+        src = src.substring(citation.raw.length)
+        pos += citation.raw.length
+        continue
+      }
+    }
     // superscript and subscript
     if (superSubScript) {
       const superSubTo = inlineRules.superscript.exec(src) || inlineRules.subscript.exec(src)

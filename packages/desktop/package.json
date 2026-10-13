@@ -1,6 +1,6 @@
 {
   "name": "marktext",
-  "version": "0.19.1",
+  "version": "0.20.0-rc.3",
   "description": "MarkText",
   "main": "./out/main/index.js",
   "author": {
@@ -105,7 +105,8 @@
     "vega-embed": "^7.1.0",
     "vue-i18n": "^11.4.2",
     "vue-router": "^4.6.4",
-    "webfontloader": "^1.6.28"
+    "webfontloader": "^1.6.28",
+    "yaml": "^2.9.0"
   },
   "optionalDependencies": {
     "native-keymap": "^3.3.9"

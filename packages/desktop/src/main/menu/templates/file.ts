@@ -103,6 +103,7 @@ export default function(
       type: 'separator'
     },
     {
+      id: 'saveMenuItem',
       label: t('menu.file.save'),
       accelerator: keybindings.getAccelerator('file.save') ?? undefined,
       click(_menuItem, browserWindow) {

@@ -3,6 +3,7 @@ import { normal, breaks, gfm, pedantic } from './inlineRules'
 import defaultOptions from './options'
 import { escape, findClosingBracket, getUniqueId, rtrim } from './utils'
 import { validateEmphasize, lowerPriority } from '../utils'
+import { parseCitation } from '../../citations/syntax'
 
 /**
  * Inline Lexer & Compiler
@@ -113,6 +114,17 @@ InlineLexer.prototype.output = function(src) {
           : escape(cap[0]))
         : cap[0])
       continue
+    }
+
+    // Resolve citations only when a document has supplied a citation renderer.
+    if (this.options.citationRenderer && !this.inLink && !this.inRawBlock) {
+      const citation = parseCitation(src)
+      if (citation) {
+        out += this.options.citationRenderer(citation)
+        src = src.substring(citation.raw.length)
+        lastChar = ']'
+        continue
+      }
     }
 
     // link

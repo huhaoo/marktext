@@ -12,6 +12,7 @@ import { EXPORT_DOMPURIFY_CONFIG } from '../config'
 import { sanitize, unescapeHTML } from '../utils'
 import { validEmoji } from '../ui/emojis'
 import { parseMathMacros } from './mathMacros'
+import { bibliographyCss, escapeCitationHtml } from '../citations/syntax'
 
 export const getSanitizeHtml = (markdown, options) => {
   const html = marked(markdown, options)
@@ -135,6 +136,9 @@ class ExportHtml {
   async renderHtml(toc) {
     this.mathRendererCalled = false
     let html = marked(this.markdown, {
+      citationRenderer: this.muya?.options.citations
+        ? citation => this.muya.options.citations.inline.get(citation.raw)?.html || escapeCitationHtml(citation.raw)
+        : undefined,
       superSubScript: this.muya ? this.muya.options.superSubScript : false,
       footnote: this.muya ? this.muya.options.footnote : false,
       isGitlabCompatibilityEnabled: this.muya
@@ -174,6 +178,10 @@ class ExportHtml {
       }
     })
 
+    if (this.muya?.options.citations) {
+      html = html.replace(/<pre class="front-matter">[\s\S]*?<\/pre>\n?/, '')
+      html += this.muya.options.citations.bibliography
+    }
     html = sanitize(html, EXPORT_DOMPURIFY_CONFIG, false)
 
     const exportContainer = (this.exportContainer = document.createElement('div'))
@@ -296,7 +304,7 @@ class ExportHtml {
       list-style-type: decimal;
     }
   </style>
-  <style>${exportStyle}</style>
+  <style>${exportStyle}${bibliographyCss}</style>
   <style>${extraCss}</style>
 </head>
 <body>

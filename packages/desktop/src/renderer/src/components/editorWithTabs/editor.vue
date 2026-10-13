@@ -80,6 +80,7 @@
       </template>
     </el-dialog>
     <editor-search v-if="!sourceCode" />
+    <citation-bibliography :target="bibliographyTarget" />
   </div>
 </template>
 
@@ -101,6 +102,11 @@ import FootnoteTool from 'muya/lib/ui/footnoteTool'
 import TableBarTools from 'muya/lib/ui/tableTools'
 import FrontMenu from 'muya/lib/ui/frontMenu'
 import EditorSearch from '../search/index.vue'
+import CitationBibliography from './citationBibliography.vue'
+import { prepareCitationExport } from '@/services/citations'
+import { muyaCitationCompletion, type CitationCompletion } from '@/services/citationCompletion'
+import { attachCitationRendering } from '@/services/citationRendering'
+import ExportHtml from 'muya/lib/utils/exportHtml'
 import bus from '@/bus'
 import { DEFAULT_EDITOR_FONT_FAMILY } from '@/config'
 import notice from '@/services/notification'
@@ -211,6 +217,9 @@ const tableChecker = reactive({
 
 // Template refs
 const editorRef = ref<HTMLDivElement | null>(null)
+const bibliographyTarget = ref<HTMLElement | null>(null)
+let citationCompletion: CitationCompletion | undefined
+let detachCitationRendering: (() => void) | undefined
 const imageViewerRef = ref<HTMLDivElement | null>(null)
 const rowInput = ref<ElInputNumberInstance>(null)
 
@@ -902,14 +911,26 @@ const handleExport = async (options: unknown) => {
   if (!/^pdf|print|styledHtml$/.test(type)) {
     throw new Error(`Invalid type to export: "${type}".`)
   }
+  if (!currentFile.value) return
+  const exportDocument = { id: currentFile.value.id, pathname: currentFile.value.pathname || undefined, markdown: sourceCode.value ? currentFile.value.markdown : editor.value.getMarkdown() }
+  const renderingOptions = { ...editor.value.options }
 
   const extraCss = await getCssForOptions(opts as unknown as PdfCssOptions)
   const htmlToc = getHtmlToc(editor.value.getTOC(), opts as unknown as HtmlTocOptions)
 
+  try {
+    renderingOptions.citations = await prepareCitationExport(exportDocument, { footnote: footnote.value, superSubScript: superSubScript.value })
+  } catch (error) {
+    notice.notify({ title: t('citations.exportFailed'), type: 'error', message: error instanceof Error ? error.message : String(error) })
+    return
+  }
+  if (currentFile.value?.id !== exportDocument.id) return
+  const renderExport = (settings: Record<string, unknown>): Promise<string> => new ExportHtml(exportDocument.markdown, { options: renderingOptions }).generate(settings)
+
   switch (type) {
     case 'styledHtml': {
       try {
-        const content = await editor.value.exportStyledHTML({
+        const content = await renderExport({
           title: htmlTitle || '',
           printOptimization: false,
           extraCss,
@@ -938,7 +959,7 @@ const handleExport = async (options: unknown) => {
           isLandscape
         }
 
-        const html = await editor.value.exportStyledHTML({
+        const html = await renderExport({
           title: '',
           printOptimization: true,
           extraCss,
@@ -963,7 +984,7 @@ const handleExport = async (options: unknown) => {
     case 'print': {
       // NOTE: Print doesn't support page size or orientation.
       try {
-        const html = await editor.value.exportStyledHTML({
+        const html = await renderExport({
           title: '',
           printOptimization: true,
           extraCss,
@@ -990,6 +1011,20 @@ const handleExport = async (options: unknown) => {
 
 const handlePrintServiceClearup = () => {
   printer.clearup()
+}
+
+const handleCitationConfig = (payload: unknown) => {
+  if (sourceCode.value || !editor.value) return
+  const { markdown } = payload as { markdown: string }
+  const muya = editor.value
+  muya.contentState.history.commitPending()
+  const history = JSON.parse(JSON.stringify(muya.getHistory()))
+  muya.setMarkdown(markdown, undefined, true)
+  const cursor = muya.getCursor()
+  muya.setHistory(history)
+  muya.contentState.cursor = { start: cursor.start, end: cursor.end, isEdit: true }
+  muya.contentState.history.commitPending()
+  muya.dispatchChange()
 }
 
 const handleEditParagraph = (type: unknown) => {
@@ -1202,6 +1237,9 @@ onMounted(() => {
   }
 
   editor.value = new Muya(ele, options)
+  bibliographyTarget.value = editor.value.container
+  citationCompletion = muyaCitationCompletion(editor.value)
+  detachCitationRendering = attachCitationRendering(editor.value)
 
   watch(mathMacros, (value, oldValue) => {
     if (value === oldValue || !editor.value) return
@@ -1232,6 +1270,7 @@ onMounted(() => {
   bus.on('redo', handleRedo)
   bus.on('selectAll', handleSelectAll)
   bus.on('export', handleExport)
+  bus.on('citations-config-change', handleCitationConfig)
   bus.on('print-service-clearup', handlePrintServiceClearup)
   bus.on('paragraph', handleEditParagraph)
   bus.on('format', handleInlineFormat)
@@ -1343,12 +1382,15 @@ onMounted(() => {
 })
 
 onBeforeUnmount(() => {
+  citationCompletion?.destroy()
+  detachCitationRendering?.()
   bus.off('file-loaded', setMarkdownToEditor)
   bus.off('invalidate-image-cache', handleInvalidateImageCache)
   bus.off('undo', handleUndo)
   bus.off('redo', handleRedo)
   bus.off('selectAll', handleSelectAll)
   bus.off('export', handleExport)
+  bus.off('citations-config-change', handleCitationConfig)
   bus.off('print-service-clearup', handlePrintServiceClearup)
   bus.off('paragraph', handleEditParagraph)
   bus.off('format', handleInlineFormat)

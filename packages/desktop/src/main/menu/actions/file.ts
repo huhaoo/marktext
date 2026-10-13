@@ -197,6 +197,7 @@ const handleResponseForSave = async(
   // is safe at this seam.
   return writeMarkdownFile(filePath, markdown, options as Parameters<typeof writeMarkdownFile>[2])
     .then(() => {
+      win.webContents.send('mt::citations-saved', { id, markdown, pathname: filePath! })
       if (!alreadyExistOnDisk) {
         ipcMain.emit('window-add-file-path', win.id, filePath)
         ipcMain.emit('menu-add-recently-used', filePath)
@@ -362,6 +363,7 @@ ipcMain.on(
       filePath = path.resolve(filePath)
       writeMarkdownFile(filePath, markdown, options as Parameters<typeof writeMarkdownFile>[2])
         .then(() => {
+          win.webContents.send('mt::citations-saved', { id, markdown, pathname: filePath! })
           if (!alreadyExistOnDisk) {
             ipcMain.emit('window-add-file-path', win.id, filePath)
             ipcMain.emit('menu-add-recently-used', filePath)

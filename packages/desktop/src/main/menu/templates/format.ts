@@ -9,6 +9,14 @@ export default function(keybindings: Keybindings): MenuItemConstructorOptions {
     label: t('menu.format.format'),
     submenu: [
       {
+        id: 'citationsSettingsMenuItem',
+        label: t('citations.settings'),
+        click(_menuItem, focusedWindow) {
+          ;(focusedWindow as BrowserWindow | undefined)?.webContents.send('mt::citations-settings')
+        }
+      },
+      { type: 'separator' },
+      {
         id: 'strongMenuItem',
         label: t('menu.format.bold'),
         type: 'checkbox',

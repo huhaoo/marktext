@@ -1,0 +1,33 @@
+.mt-citation-completion {
+  position: fixed;
+  z-index: 3000;
+  width: min(420px, calc(100vw - 16px));
+  max-height: 270px;
+  overflow: auto;
+  background: var(--editorBgColor);
+  color: var(--editorColor);
+  box-shadow: var(--floatShadow);
+  border: 1px solid var(--editorColor10);
+  border-radius: 6px;
+}
+.mt-citation-completion[hidden] { display: none; }
+.mt-citation-option, .mt-citation-empty { padding: 9px 12px; }
+.mt-citation-option { cursor: pointer; }
+.mt-citation-option.active, .mt-citation-option:hover { background: var(--floatHoverColor); }
+.mt-citation-option strong, .mt-citation-option small { display: block; overflow-wrap: anywhere; }
+.mt-citation-option small { opacity: .7; margin-top: 4px; }
+.mt-citation-option strong { font-size: 13px; font-weight: 500; }
+.mt-citation-option small, .mt-citation-empty { font-size: 12px; }
+.mt-reference-footer {
+  margin: 30px auto 60px;
+  max-width: var(--editorAreaWidth);
+  padding: 0 20px;
+  color: var(--editorColor);
+  user-select: text;
+}
+.mt-reference-footer summary { cursor: pointer; font-size: 18px; font-weight: 600; }
+.mt-reference-footer .mt-bibliography > h2 { display: none; }
+.mt-reference-footer .mt-reference-pending { font-size: 12px; opacity: .65; }
+.mt-citation-status { position: absolute; right: 18px; top: 8px; z-index: 2; font-size: 12px; }
+.mt-citation-status button { color: var(--editorColor); background: var(--editorBgColor); border: 0; cursor: pointer; }
+.mt-citation-status .mt-citation-error { color: #bc4b42; max-width: 500px; }

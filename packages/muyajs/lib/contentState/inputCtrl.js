@@ -126,7 +126,7 @@ const inputCtrl = (ContentState) => {
       return this.inputHandler(event, true)
     }
 
-    let text = getTextContent(paragraph, [CLASS_OR_ID.AG_MATH_RENDER, CLASS_OR_ID.AG_RUBY_RENDER])
+    let text = getTextContent(paragraph, [CLASS_OR_ID.AG_CITATION_RENDER, CLASS_OR_ID.AG_MATH_RENDER, CLASS_OR_ID.AG_RUBY_RENDER])
 
     let needRender = false
     let needRenderAll = false

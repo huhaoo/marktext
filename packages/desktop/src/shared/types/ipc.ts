@@ -39,6 +39,7 @@ import type { SettingsSyncConfig, SettingsSyncResult, SettingsSyncState } from '
 // =================================================================
 
 export interface IpcInvokeChannels {
+  'mt::citations::choose-files': { args: [kind: 'bibliography' | 'style']; ret: string[] }
   'mt::ask-for-image-path': { args: []; ret: string[] }
   'mt::boot-info-async': { args: []; ret: BootInfo }
   'mt::clipboard::guess-file-path': { args: []; ret: string | null }
@@ -281,6 +282,8 @@ export interface IpcMainEventChannels {
   'mt::switch-tab-by-index': [index: number]
   'mt::tab-save-failure': [tabId: string, message: string]
   'mt::tab-saved': [tabId: string]
+  'mt::citations-saved': [payload: { id: string; markdown: string; pathname: string }]
+  'mt::citations-settings': []
   'mt::tabs-cycle-left': []
   'mt::tabs-cycle-right': []
   'mt::toggle-view-layout-entry': [entry: string]

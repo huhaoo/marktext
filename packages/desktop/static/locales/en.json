@@ -1428,5 +1428,28 @@
     "vega-lite-start": "vega-lite start",
     "click-to-add-image": "Click to add image",
     "load-image-failed": "Load image failed"
+  },
+  "citations": {
+    "settings": "Citation settings",
+    "refresh": "Refresh library",
+    "bibliography": "Bibliography files",
+    "pathsHint": "One local .bib path per line (relative to this document)",
+    "chooseBibliography": "Choose .bib files",
+    "style": "Citation style",
+    "customStyle": "Local CSL style",
+    "chooseStyle": "Choose .csl file",
+    "sectionTitle": "Reference section title",
+    "references": "References",
+    "saveHint": "Save the document to update the reference list at the end.",
+    "pending": "Citations changed. Save to update the reference list.",
+    "loading": "Loading bibliography…",
+    "noMatches": "No matching citations",
+    "invalidBibliography": "Specify at least one local bibliography file.",
+    "invalidConfig": "Invalid citation configuration. Check the YAML front matter.",
+    "fileError": "Cannot read citation file",
+    "localOnly": "Use a local bibliography or CSL file.",
+    "saveFirst": "Save this document before using relative bibliography paths.",
+    "missingKeys": "Unknown citation keys",
+    "exportFailed": "Cannot export citations"
   }
 }

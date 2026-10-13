@@ -15,6 +15,7 @@ import { wordCount as getWordCount } from 'muya/lib/utils'
 import { adjustCursor } from '../../util'
 import bus from '../../bus'
 import { oneDarkThemes, railscastsThemes } from '@/config'
+import { sourceCitationCompletion, type CitationCompletion } from '@/services/citationCompletion'
 
 // CodeMirror 5 ships no first-party types; the wrapper in src/renderer/src/
 // codeMirror/index.ts also keeps the surface intentionally loose.
@@ -38,6 +39,7 @@ const preferencesStore = usePreferencesStore()
 const sourceCodeContainer = ref<HTMLDivElement | null>(null)
 
 const editor = ref<CMInstance>(null)
+let citationCompletion: CitationCompletion | undefined
 const commitTimer = ref<ReturnType<typeof setTimeout> | null>(null)
 const viewDestroyed = ref(false)
 const tabId = ref<string | null>(null)
@@ -286,6 +288,15 @@ const listenChange = () => {
   })
 }
 
+const handleCitationConfig = (payload: unknown) => {
+  if (!sourceCode.value || !editor.value) return
+  const { markdown } = payload as { markdown: string }
+  const cm = editor.value
+  const last = cm.lastLine()
+  cm.replaceRange(markdown, { line: 0, ch: 0 }, { line: last, ch: cm.getLine(last).length }, 'citations-settings')
+  saveContent(cm)
+}
+
 onMounted(() => {
   if (!currentTab.value) return
   const { id } = currentTab.value
@@ -326,6 +337,7 @@ onMounted(() => {
   bus.on('file-changed', handleFileChange)
   bus.on('selectAll', handleSelectAll)
   bus.on('image-action', handleImageAction)
+  bus.on('citations-config-change', handleCitationConfig)
 
   // For some reason, code mirror does not seem to play well with Vue's refs if we reference editor.value directly.
   // See https://github.com/codemirror/codemirror5/issues/6886 - hence, we need to use a local variable first.
@@ -349,12 +361,14 @@ onMounted(() => {
   }
 
   editor.value = codeMirrorInstance
+  citationCompletion = sourceCitationCompletion(codeMirrorInstance)
   tabId.value = id
 
   listenChange()
 })
 
 onBeforeUnmount(() => {
+  citationCompletion?.destroy()
   viewDestroyed.value = true
   if (commitTimer.value) clearTimeout(commitTimer.value)
 
@@ -363,6 +377,7 @@ onBeforeUnmount(() => {
   bus.off('file-changed', handleFileChange)
   bus.off('selectAll', handleSelectAll)
   bus.off('image-action', handleImageAction)
+  bus.off('citations-config-change', handleCitationConfig)
 
   const { cursor, markdown: newMarkdown } = getMarkdownAndCursor(editor.value)
   bus.emit('file-changed', {

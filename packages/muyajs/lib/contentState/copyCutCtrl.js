@@ -72,6 +72,7 @@ const copyCutCtrl = (ContentState) => {
     wrapper.innerHTML = html
     const removedElements = wrapper.querySelectorAll(
       `.${CLASS_OR_ID.AG_TOOL_BAR},
+      .${CLASS_OR_ID.AG_CITATION_RENDER},
       .${CLASS_OR_ID.AG_MATH_RENDER},
       .${CLASS_OR_ID.AG_RUBY_RENDER},
       .${CLASS_OR_ID.AG_HTML_PREVIEW},

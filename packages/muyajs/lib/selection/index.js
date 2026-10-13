@@ -476,6 +476,7 @@ class Selection {
       for (i = 0; i < len; i++) {
         const child = childNodes[i]
         const textContent = getTextContent(child, [
+          CLASS_OR_ID.AG_CITATION_RENDER,
           CLASS_OR_ID.AG_MATH_RENDER,
           CLASS_OR_ID.AG_RUBY_RENDER
         ])
@@ -622,11 +623,13 @@ class Selection {
       if (preElement) {
         aOffset += getOffsetOfParagraph(preElement, anchorParagraph)
         aOffset += getTextContent(preElement, [
+          CLASS_OR_ID.AG_CITATION_RENDER,
           CLASS_OR_ID.AG_MATH_RENDER,
           CLASS_OR_ID.AG_RUBY_RENDER
         ]).length
       }
       aOffset += getTextContent(imageWrapper, [
+        CLASS_OR_ID.AG_CITATION_RENDER,
         CLASS_OR_ID.AG_MATH_RENDER,
         CLASS_OR_ID.AG_RUBY_RENDER
       ]).length
@@ -646,12 +649,14 @@ class Selection {
       if (preElement) {
         aOffset += getOffsetOfParagraph(preElement, anchorParagraph)
         aOffset += getTextContent(preElement, [
+          CLASS_OR_ID.AG_CITATION_RENDER,
           CLASS_OR_ID.AG_MATH_RENDER,
           CLASS_OR_ID.AG_RUBY_RENDER
         ]).length
       }
       if (anchorOffset === 1) {
         aOffset += getTextContent(imageWrapper, [
+          CLASS_OR_ID.AG_CITATION_RENDER,
           CLASS_OR_ID.AG_MATH_RENDER,
           CLASS_OR_ID.AG_RUBY_RENDER
         ]).length
