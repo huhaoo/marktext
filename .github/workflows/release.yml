@@ -42,6 +42,9 @@ jobs:
           const { SemVer } = require('semver');
           const tag = process.env.MARKTEXT_RELEASE_TAG;
           if (!tag.startsWith('v')) throw new Error('Expected a v-prefixed SemVer tag');
+          if (process.env.GITHUB_REPOSITORY === 'huhaoo/marktext' && !/^v0\.19\.1-0\.(0|[1-9][0-9]*)$/.test(tag)) {
+            throw new Error('This personal maintenance line uses v0.19.1-0.N. Change the documented baseline explicitly before publishing another series.');
+          }
           const version = tag.slice(1);
           new SemVer(version);
           for (const file of ['./package.json', './packages/desktop/package.json']) {
