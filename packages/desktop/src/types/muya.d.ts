@@ -56,6 +56,8 @@ declare module 'muya/lib/parser/marked/slugger' {
 
 declare module 'muya/lib/parser/marked' {
   export const Lexer: any
+  const marked: any
+  export default marked
 }
 
 declare module 'muya/lib/parser' {

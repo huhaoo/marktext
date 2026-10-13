@@ -49,7 +49,12 @@ const multiplexMode = (CodeMirror: CodeMirrorLike): void => {
           const oldContent = stream.string
           for (let i = 0; i < others.length; ++i) {
             const other = others[i]
-            const found = indexOf(oldContent, other.open, stream.pos)
+            let found = indexOf(oldContent, other.open, stream.pos)
+            if (other.guard) {
+              while (found !== -1 && !other.guard(oldContent, found, state.outer)) {
+                found = indexOf(oldContent, other.open, found + 1)
+              }
+            }
             if (found === stream.pos) {
               if (!other.parseDelimiters) stream.match(other.open)
               state.innerActive = other
@@ -78,9 +83,14 @@ const multiplexMode = (CodeMirror: CodeMirrorLike): void => {
             state.innerActive = state.inner = null
             return this.token(stream, state)
           }
-          const found = curInner.close
+          let found = curInner.close
             ? indexOf(oldContent, curInner.close, stream.pos, curInner.parseDelimiters)
             : -1
+          if (curInner.closeGuard) {
+            while (found !== -1 && !curInner.closeGuard(oldContent, found)) {
+              found = indexOf(oldContent, curInner.close, found + 1)
+            }
+          }
           if (found === stream.pos && !curInner.parseDelimiters) {
             stream.match(curInner.close)
             state.innerActive = state.inner = null

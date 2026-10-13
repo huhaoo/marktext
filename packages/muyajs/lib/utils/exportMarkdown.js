@@ -244,6 +244,14 @@ class ExportMarkdown {
     const { isGitlabCompatibilityEnabled } = this
     let startToken = '$$'
     let endToken = '$$'
+    if (block.mathStyle === 'latex' || block.mathStyle === 'latex-single') {
+      startToken = '\\['
+      endToken = '\\]'
+      const lines = block.children[0].children[0].children
+      if (block.mathStyle === 'latex-single' && lines.length === 1 && !lines[0].text.includes('\n')) {
+        return `${indent}${startToken}${lines[0].text}${endToken}\n`
+      }
+    }
     if (isGitlabCompatibilityEnabled && block.mathStyle === 'gitlab') {
       startToken = '```math'
       endToken = '```'

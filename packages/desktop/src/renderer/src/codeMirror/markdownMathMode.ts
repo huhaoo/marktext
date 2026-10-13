@@ -22,11 +22,22 @@ import 'codemirror/mode/stex/stex'
 // stray `$` (e.g. "$5 owed") from flipping the inner mode on forever and keeps
 // the source-view tokenization aligned with the inline parse.
 const INLINE_MATH_OPEN = /\$(?!\$)(?=[^$\n]*?[^$\\]\$(?!\$))/
+const INLINE_LATEX_OPEN = /\\\((?=[^\n]*?\\\))/
+const unescaped = (text: string, position: number): boolean => {
+  let slashes = 0
+  for (let i = position - 1; i >= 0 && text[i] === '\\'; i--) slashes++
+  return slashes % 2 === 0
+}
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type CodeMirrorLike = any
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnyObj = any
+
+const latexGuard = (text: string, position: number, state: AnyObj): boolean => {
+  const markdown = state.base || state
+  return unescaped(text, position) && !markdown.code && !markdown.fencedEndRE && !state.overlay?.code && !state.overlay?.codeBlock
+}
 
 const registerMarkdownMathMode = (CodeMirror: CodeMirrorLike): void => {
   if (CodeMirror.modes && Object.prototype.hasOwnProperty.call(CodeMirror.modes, 'markdown-math')) {
@@ -48,6 +59,24 @@ const registerMarkdownMathMode = (CodeMirror: CodeMirrorLike): void => {
     // tokenizer cannot see from the opener.
     return CodeMirror.multiplexingMode(
       gfmMode,
+      {
+        open: '\\[',
+        close: '\\]',
+        mode: stexMode,
+        guard: latexGuard,
+        closeGuard: unescaped,
+        delimStyle: 'formatting formatting-math formatting-math-block math-block',
+        innerStyle: 'math math-block'
+      },
+      {
+        open: INLINE_LATEX_OPEN,
+        close: '\\)',
+        mode: stexMode,
+        guard: latexGuard,
+        closeGuard: unescaped,
+        delimStyle: 'formatting formatting-math formatting-math-inline math-inline',
+        innerStyle: 'math math-inline'
+      },
       {
         open: '$$',
         close: '$$',

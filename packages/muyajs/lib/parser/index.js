@@ -3,6 +3,7 @@ import { isLengthEven, union } from '../utils'
 import { findClosingBracket } from './marked/utils'
 import { getAttributes, parseSrcAndTitle, validateEmphasize, lowerPriority } from './utils'
 import { parseCitation } from '../citations/syntax'
+import { matchLatexInlineMath } from '../utils/latexDelimiters'
 
 // const CAN_NEST_RULES = ['strong', 'em', 'link', 'del', 'a_link', 'reference_link', 'html_tag']
 // disallowed html tags in https://github.github.com/gfm/#raw-html
@@ -124,6 +125,14 @@ const tokenizerFac = (src, beginRules, inlineRules, pos = 0, top, labels, option
   }
 
   while (src.length) {
+    const latexMath = options.math !== false && matchLatexInlineMath(src)
+    if (latexMath) {
+      pushPending()
+      tokens.push({ type: 'inline_math', ...latexMath, backlash: '', parent: tokens, range: { start: pos, end: pos + latexMath.raw.length } })
+      src = src.substring(latexMath.raw.length)
+      pos += latexMath.raw.length
+      continue
+    }
     // backlash
     const backTo = inlineRules.backlash.exec(src)
     if (backTo) {

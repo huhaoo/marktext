@@ -14,10 +14,11 @@ export default function displayMath(h, cursor, block, token, outerClass) {
 
   const { start, end } = token.range
   const { marker } = token
+  const closingMarker = token.closingMarker || marker
 
   const startMarker = this.highlight(h, block, start, start + marker.length, token)
-  const endMarker = this.highlight(h, block, end - marker.length, end, token)
-  const content = this.highlight(h, block, start + marker.length, end - marker.length, token)
+  const endMarker = this.highlight(h, block, end - closingMarker.length, end, token)
+  const content = this.highlight(h, block, start + marker.length, end - closingMarker.length, token)
 
   const { content: math, type } = token
 

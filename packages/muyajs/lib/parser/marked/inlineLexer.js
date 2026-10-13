@@ -4,6 +4,7 @@ import defaultOptions from './options'
 import { escape, findClosingBracket, getUniqueId, rtrim } from './utils'
 import { validateEmphasize, lowerPriority } from '../utils'
 import { parseCitation } from '../../citations/syntax'
+import { matchLatexInlineMath } from '../../utils/latexDelimiters'
 
 /**
  * Inline Lexer & Compiler
@@ -66,6 +67,13 @@ InlineLexer.prototype.output = function(src) {
   let lastChar = ''
 
   while (src) {
+    const latexMath = math && !this.inRawBlock && !this.inLink && matchLatexInlineMath(src)
+    if (latexMath) {
+      out += this.renderer.inlineMath(latexMath.content)
+      src = src.substring(latexMath.raw.length)
+      lastChar = ')'
+      continue
+    }
     // escape
     cap = this.rules.escape.exec(src)
     if (cap) {

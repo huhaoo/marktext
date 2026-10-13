@@ -2,6 +2,7 @@ import { normal, gfm, pedantic } from './blockRules'
 import options from './options'
 import { splitCells, rtrim, getUniqueId } from './utils'
 import { CURSOR_ANCHOR_DNA, CURSOR_FOCUS_DNA } from '../../config'
+import { matchLatexDisplayMath } from '../../utils/latexDelimiters'
 
 /**
  * Block Lexer
@@ -165,6 +166,12 @@ Lexer.prototype.token = function(
 
     // multiple line math
     if (math) {
+      const latexMath = matchLatexDisplayMath(src)
+      if (latexMath) {
+        src = src.substring(latexMath.raw.length)
+        this.tokens.push({ type: 'multiplemath', text: cursorAnchorFocus + latexMath.content, mathStyle: latexMath.mathStyle })
+        continue
+      }
       cap = this.rules.multiplemath.exec(src)
       if (cap) {
         src = src.substring(cap[0].length)
@@ -642,6 +649,16 @@ Lexer.prototype.token = function(
     // top-level paragraph
     cap = this.rules.paragraph.exec(src)
     if (top && cap) {
+      if (math) {
+        const starts = /\n(?= {0,3}\\\[)/g
+        let start
+        while ((start = starts.exec(cap[0]))) {
+          if (matchLatexDisplayMath(src.slice(start.index + 1))) {
+            cap[0] = cap[1] = cap[0].slice(0, start.index)
+            break
+          }
+        }
+      }
       src = src.substring(cap[0].length)
 
       if (/^\[toc\]\n?$/i.test(cap[1])) {

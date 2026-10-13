@@ -1,3 +1,5 @@
+import { matchLatexDisplayMath } from '../utils/latexDelimiters'
+
 const FUNCTION_TYPE_LANG = {
   multiplemath: 'latex',
   flowchart: 'yaml',
@@ -135,6 +137,13 @@ const containerCtrl = (ContentState) => {
     }
 
     const { text } = block.children[0]
+    if (text.trim() === '\\[') return this.initContainerBlock(functionType, block, 'latex')
+    const latexMath = matchLatexDisplayMath(text)
+    if (latexMath) {
+      const line = this.initContainerBlock(functionType, block, latexMath.mathStyle)
+      line.text = latexMath.content
+      return line
+    }
     return text.trim() === '$$' ? this.initContainerBlock(functionType, block, '') : false
   }
 }
