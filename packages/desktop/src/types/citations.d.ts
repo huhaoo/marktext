@@ -13,8 +13,13 @@ declare module 'muya/lib/citations/engine' {
     missing: string[]
   }
   export function parseBibliography(sources: Array<{ path: string; text: string }>): CitationEntry[]
+  export interface ParsedBibliography { entries: CitationEntry[]; skipped: number }
+  export function parseBibliographyWithDiagnostics(sources: Array<{ path: string; text: string }>): ParsedBibliography
   export function collectCitations(markdown: string, options?: Record<string, unknown>): Citation[]
   export function formatCitations(entries: CitationEntry[], citations: Citation[], style?: string, title?: string, validate?: boolean): FormattedCitations
+}
+declare module 'muya/lib/citations/missingKeys' {
+  export function omitMissingKeyEntries(text: string): { text: string; skipped: number }
 }
 declare module 'muya/lib/citations/collect' {
   import type { Citation } from 'muya/lib/citations/engine'

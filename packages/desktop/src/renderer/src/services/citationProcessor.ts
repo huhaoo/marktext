@@ -1,4 +1,4 @@
-import type { Citation, CitationEntry, FormattedCitations } from 'muya/lib/citations/engine'
+import type { Citation, CitationEntry, FormattedCitations, ParsedBibliography } from 'muya/lib/citations/engine'
 
 // The expensive BibTeX/CSL work never runs on the editor's UI thread.
 let worker: Worker | undefined
@@ -27,7 +27,7 @@ const request = <T>(message: Record<string, unknown>): Promise<T> => {
     worker!.postMessage({ ...message, id })
   })
 }
-export const parseBibliography = (sources: Array<{ path: string; text: string }>) => request<CitationEntry[]>({ command: 'parse', sources })
+export const parseBibliography = (sources: Array<{ path: string; text: string }>) => request<ParsedBibliography>({ command: 'parse', sources })
 export const formatCitations = (entries: CitationEntry[], citations: Citation[], style: string, title: string) => {
   if (style !== 'ieee' && style !== 'apa') {
     const xml = new DOMParser().parseFromString(style, 'application/xml')

@@ -15,6 +15,12 @@
     >
       {{ citationState.error }}
     </div>
+    <div
+      v-else-if="citationState.notice"
+      class="mt-citation-notice"
+    >
+      {{ citationState.notice }}
+    </div>
   </div>
   <el-dialog
     v-model="visible"

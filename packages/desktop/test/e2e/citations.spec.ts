@@ -138,3 +138,50 @@ test.describe.serial('Bibliographic citations', () => {
     await expectNoRendererErrors(app)
   })
 })
+
+test('skips missing EndNote keys while keeping other entries usable and the library unchanged', async() => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'marktext-endnote-test-'))
+  const bibPath = path.join(dir, 'endnote.txt')
+  const text = '@misc{\n author={Doe, Jane}, title={Skipped EndNote Export}, year={2026}\n}\n' + bibliography
+  fs.writeFileSync(bibPath, text)
+  let app: ElectronApplication | undefined
+  try {
+    const launched = await launchWithMarkdown(`---\nbibliography: ${JSON.stringify(bibPath.replace(/\\/g, '/'))}\ncsl: ieee\n---\n\nText.`, { suppressErrorDialog: true })
+    app = launched.app
+    const page = launched.page
+    await expect(page.locator('.mt-citation-notice')).toContainText(/1/)
+    await expect(page.locator('.mt-citation-notice')).toContainText(/Skipped|跳过/)
+    await expect(page.locator('.mt-citation-error')).toHaveCount(0)
+    await enterSourceMode(page, app)
+    await page.evaluate(() => {
+      const cm = (document.querySelector('.source-code .CodeMirror') as Element & { CodeMirror: CM }).CodeMirror
+      cm.setCursor({ line: cm.lastLine(), ch: cm.getLine(cm.lastLine()).length })
+      cm.focus()
+    })
+    await page.keyboard.type(' [@Skipped EndNote')
+    await expect(page.locator('.mt-citation-completion:not([hidden])')).toHaveCount(0)
+    // Replace the unfinished search via the editor API, then search a valid entry.
+    await page.evaluate(() => {
+      const cm = (document.querySelector('.source-code .CodeMirror') as Element & { CodeMirror: CM }).CodeMirror
+      cm.setValue(cm.getValue().replace(' [@Skipped EndNote', ''))
+      cm.setCursor({ line: cm.lastLine(), ch: cm.getLine(cm.lastLine()).length })
+      cm.focus()
+    })
+    await page.keyboard.type(' [@Attention Is All')
+    const option = page.locator('.mt-citation-completion:not([hidden]) .mt-citation-option').first()
+    await expect(option).toContainText('Vaswani2017')
+    await page.keyboard.press('Enter')
+    expect(await getMarkdownContent(page, app)).toContain('[@Vaswani2017]')
+    await exitSourceMode(page, app)
+    await expect(page.locator('.ag-citation-render')).toHaveText('[1]')
+    await expect(page.locator('.mt-reference-footer')).not.toContainText('Attention Is All You Need')
+    await clickMenuById(app, 'saveMenuItem')
+    await expect(page.locator('.mt-reference-footer')).toContainText('Attention Is All You Need')
+    await expect(page.locator('.mt-reference-footer')).not.toContainText('Skipped EndNote Export')
+    expect(fs.readFileSync(bibPath, 'utf8')).toBe(text)
+    await expectNoRendererErrors(app)
+  } finally {
+    if (app) await app.close()
+    fs.rmSync(dir, { recursive: true, force: true })
+  }
+})

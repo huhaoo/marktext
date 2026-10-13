@@ -1450,6 +1450,7 @@
     "localOnly": "Use a local bibliography or CSL file.",
     "saveFirst": "Save this document before using relative bibliography paths.",
     "missingKeys": "Unknown citation keys",
-    "exportFailed": "Cannot export citations"
+    "exportFailed": "Cannot export citations",
+    "skippedEntries": "Skipped {count} entries without citation keys. Other entries loaded normally."
   }
 }

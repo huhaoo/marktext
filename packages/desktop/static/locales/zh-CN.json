@@ -1451,6 +1451,7 @@
     "localOnly": "请使用本地文献库或 CSL 文件。",
     "saveFirst": "使用相对文献库路径前，请先保存文档。",
     "missingKeys": "找不到引用键",
-    "exportFailed": "无法导出文献引用"
+    "exportFailed": "无法导出文献引用",
+    "skippedEntries": "已跳过 {count} 条缺少引用键的文献，其余条目正常加载。"
   }
 }

@@ -44,7 +44,7 @@ export const registerFsHandlers = (): void => {
     if (!win) return []
     const result = await dialog.showOpenDialog(win, {
       properties: kind === 'bibliography' ? ['openFile', 'multiSelections'] : ['openFile'],
-      filters: [{ name: kind === 'bibliography' ? 'BibTeX / BibLaTeX' : 'CSL', extensions: kind === 'bibliography' ? ['bib', 'bibtex'] : ['csl'] }]
+      filters: [{ name: kind === 'bibliography' ? 'BibTeX / BibLaTeX' : 'CSL', extensions: kind === 'bibliography' ? ['bib', 'bibtex', 'txt'] : ['csl'] }]
     })
     return result.canceled ? [] : result.filePaths
   })

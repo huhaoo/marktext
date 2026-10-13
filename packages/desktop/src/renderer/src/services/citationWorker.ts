@@ -1,4 +1,4 @@
-import { parseBibliography, formatCitations } from 'muya/lib/citations/engine'
+import { parseBibliographyWithDiagnostics, formatCitations } from 'muya/lib/citations/engine'
 import type { Citation, CitationEntry } from 'muya/lib/citations/engine'
 
 type Request = { id: number } & (
@@ -9,7 +9,7 @@ self.addEventListener('message', (event: MessageEvent<Request>) => {
   const request = event.data
   try {
     const result = request.command === 'parse'
-      ? parseBibliography(request.sources)
+      ? parseBibliographyWithDiagnostics(request.sources)
       : formatCitations(request.entries, request.citations, request.style, request.title, false)
     self.postMessage({ id: request.id, result })
   } catch (error) {

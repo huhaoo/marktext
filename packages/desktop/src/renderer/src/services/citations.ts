@@ -42,6 +42,7 @@ export const citationState = shallowReactive({
   enabled: false,
   loading: false,
   error: '',
+  notice: '',
   entries: [] as CitationEntry[],
   inline: new Map<string, { html: string; title: string }>(),
   bibliography: '',
@@ -50,7 +51,7 @@ export const citationState = shallowReactive({
   revision: 0
 })
 
-interface Resources { entries: CitationEntry[]; style: string; version: string }
+interface Resources { entries: CitationEntry[]; skipped: number; style: string; version: string }
 interface Session {
   version: number;
   configKey: string;
@@ -90,7 +91,7 @@ const resolvePath = (path: string, pathname?: string): string => {
 
 export const activateCitations = (id: string) => {
   if (citationState.documentId === id) return
-  Object.assign(citationState, { documentId: id, enabled: false, loading: false, error: '', entries: [], inline: new Map(), bibliography: '', bibliographyTitle: '', pending: false })
+  Object.assign(citationState, { documentId: id, enabled: false, loading: false, error: '', notice: '', entries: [], inline: new Map(), bibliography: '', bibliographyTitle: '', pending: false })
 }
 
 export const updateCitations = async(
@@ -109,7 +110,7 @@ export const updateCitations = async(
     config = readCitationConfig(doc.markdown)
     if (!config) {
       if (options.saved) { session.savedBibliography = ''; session.savedKey = ''; session.savedTitle = '' }
-      if (citationState.documentId === doc.id) Object.assign(citationState, { enabled: false, loading: false, entries: [], inline: new Map(), error: '', bibliography: session.savedBibliography, bibliographyTitle: session.savedTitle, pending: !!session.savedBibliography })
+      if (citationState.documentId === doc.id) Object.assign(citationState, { enabled: false, loading: false, entries: [], inline: new Map(), error: '', notice: '', bibliography: session.savedBibliography, bibliographyTitle: session.savedTitle, pending: !!session.savedBibliography })
       return undefined
     }
     if (citationState.documentId === doc.id) {
@@ -126,7 +127,7 @@ export const updateCitations = async(
     const resourceVersion = JSON.stringify([sources, style])
     const resources = session.resources?.version === resourceVersion
       ? session.resources
-      : { entries: await engine.parseBibliography(sources), style, version: resourceVersion }
+      : { ...await engine.parseBibliography(sources), style, version: resourceVersion }
     const citations = collectCitations(doc.markdown, { footnote: options.footnote, superSubScript: options.superSubScript })
     const formatKey = JSON.stringify([configKey, resourceVersion, citations])
     let result = session.result
@@ -157,13 +158,14 @@ export const updateCitations = async(
         bibliographyTitle: session.savedTitle,
         pending: session.savedKey !== formatKey,
         error: result.missing.length ? `${t('citations.missingKeys')}: ${result.missing.join(', ')}` : '',
+        notice: resources.skipped ? t('citations.skippedEntries', { count: resources.skipped }) : '',
         revision: citationState.revision + Number(citationState.inline !== result.inline)
       })
     }
     return result
   } catch (error) {
     if (session.version === version && citationState.documentId === doc.id) {
-      Object.assign(citationState, { enabled: true, loading: false, entries: [], inline: new Map(), bibliography: session.savedBibliography, bibliographyTitle: session.savedTitle, error: error instanceof Error ? error.message : String(error), revision: citationState.revision + 1 })
+      Object.assign(citationState, { enabled: true, loading: false, entries: [], inline: new Map(), notice: '', bibliography: session.savedBibliography, bibliographyTitle: session.savedTitle, error: error instanceof Error ? error.message : String(error), revision: citationState.revision + 1 })
     }
     throw error
   }

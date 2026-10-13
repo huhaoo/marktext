@@ -1,8 +1,9 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { performance } from 'node:perf_hooks'
 import path from 'pathe'
-import { parseBibliography, collectCitations, formatCitations } from 'muya/lib/citations/engine'
+import { parseBibliography, parseBibliographyWithDiagnostics, collectCitations, formatCitations } from 'muya/lib/citations/engine'
 import { parseCitation, referenceId } from 'muya/lib/citations/syntax'
+import { omitMissingKeyEntries } from 'muya/lib/citations/missingKeys'
 import { citationCompletionContext, citationReplacement, searchCitations } from 'muya/lib/citations/completion'
 import { tokenizer, generator } from 'muya/lib/parser'
 import { readCitationConfig, writeCitationConfig, activateCitations, updateCitations, citationState, citationFormatCount, prepareCitationExport } from '@/services/citations'
@@ -11,7 +12,7 @@ import { CitationCompletion } from '@/services/citationCompletion'
 vi.mock('@/i18n', () => ({ t: (key: string) => key }))
 vi.mock('@/services/citationProcessor', async() => {
   const engine = await import('muya/lib/citations/engine')
-  return { parseBibliography: async(...args: Parameters<typeof engine.parseBibliography>) => engine.parseBibliography(...args), formatCitations: async(...args: Parameters<typeof engine.formatCitations>) => engine.formatCitations(...args) }
+  return { parseBibliography: async(...args: Parameters<typeof engine.parseBibliography>) => engine.parseBibliographyWithDiagnostics(...args), formatCitations: async(...args: Parameters<typeof engine.formatCitations>) => engine.formatCitations(...args) }
 })
 const bib = `@article{Vaswani2017,
   author = {Vaswani, Ashish}, title = {Attention Is All You Need},
@@ -30,6 +31,48 @@ describe('citation parsing and document formatting', () => {
   })
   it('rejects duplicate keys across libraries', () => {
     expect(() => parseBibliography([{ text: bib, path: 'one.bib' }, { text: bib, path: 'two.bib' }])).toThrow(/Vaswani2017/)
+  })
+  it('skips EndNote BibTeX records with omitted keys and preserves explicit keys', () => {
+    const text = `@misc{\n author={Doe, Jane}, title={Anonymous Export Example}, year={2026}, url={https://example.org/paper/1}\n}\n${bib}`
+    const result = parseBibliographyWithDiagnostics([{ path: 'endnote.txt', text }])
+    expect(result.skipped).toBe(1)
+    expect(result.entries.map(item => item.id)).toEqual(['Vaswani2017', 'zhang2024'])
+    expect(searchCitations(result.entries, 'Anonymous Export')).toEqual([])
+    expect(formatCitations(result.entries, collectCitations('[@Vaswani2017]')).missing).toEqual([])
+  })
+  it('skips empty keys and empty records across multiple libraries', () => {
+    const result = parseBibliographyWithDiagnostics([
+      { path: 'one.bib', text: '@article{, title={Empty Key}}\n' + bib },
+      { path: 'two.bib', text: '@misc{}\n@misc{title={No Key}}' }
+    ])
+    expect(result.skipped).toBe(3)
+    expect(result.entries.map(item => item.id)).toEqual(['Vaswani2017', 'zhang2024'])
+  })
+  it('does not repair entry-looking strings in literal field values or comments', () => {
+    const text = '@misc{existing, title={Literal @misc{ author = {example} }}, year={2026}}\n@comment{Literal @misc{ author={ignored} }}\n@string{journal={Example Journal}}'
+    expect(omitMissingKeyEntries(text).text).toBe(text)
+    const comment = '% @misc{ author={ignored}\n' + text
+    expect(omitMissingKeyEntries(comment).text).toBe(comment)
+    const data = parseBibliography([{ path: 'literal.bib', text }])
+    expect(data).toHaveLength(1)
+    expect(data[0].id).toBe('existing')
+    expect(data[0].title).toContain('@misc')
+  })
+  it('supports missing headers with comments and parenthesized BibTeX entries', () => {
+    const text = '@misc(\n% export without label\nauthor={Doe, Jane}, title={Parenthesis Example}, year={2026}\n)'
+    const data = parseBibliography([{ path: 'parenthesis.bib', text }])
+    expect(data).toEqual([])
+  })
+  it('still rejects malformed field syntax and includes the source filename', () => {
+    expect(() => parseBibliography([{ path: 'broken-library.bib', text: '@article{key, title={Example} year={2026}}' }])).toThrow(/broken-library\.bib/)
+  })
+  it('preserves error positions and does not silently drop unclosed records', () => {
+    const text = '@misc{\n title={No Key}\n}\n@article{key, title={Example} year={2026}}'
+    const normalized = omitMissingKeyEntries(text)
+    expect(normalized.text.length).toBe(text.length)
+    expect(normalized.text.split('\n').length).toBe(text.split('\n').length)
+    expect(() => parseBibliography([{ path: 'position.bib', text }])).toThrow(/line 4/)
+    expect(() => parseBibliography([{ path: 'unclosed.bib', text: '@misc{title={No Key}' }])).toThrow(/unclosed\.bib/)
   })
   it('parses multiple items and pages, preserving the source', () => {
     expect(parseCitation('[@Vaswani2017; @zhang2024, pp. 3–5] rest')?.items).toEqual([{ id: 'Vaswani2017' }, { id: 'zhang2024', label: 'page', locator: '3–5' }])

@@ -30,4 +30,5 @@
 .mt-reference-footer .mt-reference-pending { font-size: 12px; opacity: .65; }
 .mt-citation-status { position: absolute; right: 18px; top: 8px; z-index: 2; font-size: 12px; }
 .mt-citation-status button { color: var(--editorColor); background: var(--editorBgColor); border: 0; cursor: pointer; }
-.mt-citation-status .mt-citation-error { color: #bc4b42; max-width: 500px; }
+.mt-citation-status .mt-citation-error { color: #bc4b42; max-width: 500px; overflow-wrap: anywhere; }
+.mt-citation-status .mt-citation-notice { opacity: .7; max-width: 500px; }

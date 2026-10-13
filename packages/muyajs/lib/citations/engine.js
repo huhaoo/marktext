@@ -4,14 +4,23 @@ import '@citation-js/plugin-csl'
 import CSL from 'citeproc'
 import { escapeCitationHtml, referenceId } from './syntax'
 import ieee from './ieee.csl?raw'
+import { omitMissingKeyEntries } from './missingKeys'
 
 const config = plugins.config.get('@csl')
 
-export const parseBibliography = (sources) => {
+export const parseBibliographyWithDiagnostics = (sources) => {
   const entries = []
   const keys = new Set()
+  let skipped = 0
   for (const { text, path } of sources) {
-    const parsed = new Cite(text, { forceType: '@biblatex/text' }).data
+    const normalized = omitMissingKeyEntries(text)
+    skipped += normalized.skipped
+    let parsed
+    try {
+      parsed = normalized.text.trim() ? new Cite(normalized.text, { forceType: '@biblatex/text' }).data : []
+    } catch (error) {
+      throw new Error(`${path}: ${error instanceof Error ? error.message : String(error)}`)
+    }
     for (const item of parsed) {
       const id = String(item.id)
       if (keys.has(id)) throw new Error(`Duplicate citation key: ${id} (${path})`)
@@ -19,8 +28,10 @@ export const parseBibliography = (sources) => {
       entries.push({ ...item, id })
     }
   }
-  return entries
+  return { entries, skipped }
 }
+
+export const parseBibliography = (sources) => parseBibliographyWithDiagnostics(sources).entries
 
 export { collectCitations } from './collect'
 
