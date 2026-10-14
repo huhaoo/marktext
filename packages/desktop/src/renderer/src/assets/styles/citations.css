@@ -25,6 +25,14 @@
   color: var(--editorColor);
   user-select: text;
 }
+/* The editor's blank trailing viewport must not become part of the reference gap. */
+.editor-component:has(> .mt-reference-footer) > #ag-editor-id {
+  min-height: 0;
+  padding-bottom: 0 !important;
+}
+.editor-component:has(> .mt-reference-footer) > #ag-editor-id > :last-child {
+  margin-bottom: 0;
+}
 .mt-reference-footer summary { cursor: pointer; font-size: 18px; font-weight: 600; }
 .mt-reference-footer .mt-bibliography > h2 { display: none; }
 .mt-reference-footer .mt-reference-pending { font-size: 12px; opacity: .65; }

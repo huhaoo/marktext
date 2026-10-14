@@ -1439,6 +1439,8 @@
     "customStyle": "Local CSL style",
     "chooseStyle": "Choose .csl file",
     "sectionTitle": "Reference section title",
+    "sectionSpacing": "Gap before references (px)",
+    "invalidSpacing": "Reference gap must be a whole number from 0 to {max} pixels.",
     "references": "References",
     "saveHint": "Save the document to update the reference list at the end.",
     "pending": "Citations changed. Save to update the reference list.",

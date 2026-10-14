@@ -64,6 +64,19 @@
           </el-button>
         </template>
       </el-form-item>
+      <el-form-item
+        class="mt-reference-spacing"
+        :label="t('citations.sectionSpacing')"
+      >
+        <el-input-number
+          v-model="spacing"
+          :min="0"
+          :max="MAX_REFERENCE_SPACING"
+          :precision="0"
+          :step="10"
+          controls-position="right"
+        />
+      </el-form-item>
       <el-form-item :label="t('citations.sectionTitle')">
         <el-input v-model="title" />
       </el-form-item>
@@ -96,7 +109,7 @@ import { useI18n } from 'vue-i18n'
 import { useEditorStore } from '@/store/editor'
 import { usePreferencesStore } from '@/store/preferences'
 import bus from '@/bus'
-import { activateCitations, citationState, readCitationConfig, writeCitationConfig, updateCitations, type CitationDocument } from '@/services/citations'
+import { activateCitations, citationState, readCitationConfig, writeCitationConfig, updateCitations, DEFAULT_REFERENCE_SPACING, MAX_REFERENCE_SPACING, type CitationDocument } from '@/services/citations'
 
 const { t } = useI18n()
 const { currentFile } = storeToRefs(useEditorStore())
@@ -106,6 +119,7 @@ const paths = ref('')
 const style = ref('ieee')
 const customStyle = ref('')
 const title = ref('')
+const spacing = ref<number | undefined>(DEFAULT_REFERENCE_SPACING)
 const error = ref('')
 let timer: ReturnType<typeof setTimeout> | undefined
 const currentDocument = (): CitationDocument | null => currentFile.value
@@ -135,6 +149,7 @@ const open = () => {
     style.value = ['ieee', 'apa'].includes(config?.csl || 'ieee') ? config?.csl || 'ieee' : 'custom'
     customStyle.value = style.value === 'custom' ? config?.csl || '' : ''
     title.value = config?.title || t('citations.references')
+    spacing.value = config?.spacing ?? DEFAULT_REFERENCE_SPACING
   } catch (err) { error.value = String(err) }
   visible.value = true
 }
@@ -155,7 +170,7 @@ const apply = () => {
     if (!bibliography.length) throw new Error(t('citations.invalidBibliography'))
     const csl = style.value === 'custom' ? customStyle.value.trim() : style.value
     if (!csl) throw new Error(t('citations.invalidConfig'))
-    const markdown = writeCitationConfig(file.markdown, { bibliography, csl, title: title.value })
+    const markdown = writeCitationConfig(file.markdown, { bibliography, csl, title: title.value, spacing: spacing.value ?? DEFAULT_REFERENCE_SPACING })
     bus.emit('citations-config-change', { markdown })
     visible.value = false
   } catch (err) { error.value = err instanceof Error ? err.message : String(err) }

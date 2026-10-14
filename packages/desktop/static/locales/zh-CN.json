@@ -1440,6 +1440,8 @@
     "customStyle": "本地 CSL 样式",
     "chooseStyle": "选择 .csl 文件",
     "sectionTitle": "参考文献标题",
+    "sectionSpacing": "正文与参考文献间距（像素）",
+    "invalidSpacing": "参考文献间距须为 0 到 {max} 像素之间的整数。",
     "references": "参考文献",
     "saveHint": "保存文档后，末尾参考文献列表才会更新。",
     "pending": "引用已更改，保存后更新参考文献。",

@@ -6,6 +6,7 @@
     <div
       v-if="citationState.bibliography || citationState.pending"
       class="mt-reference-footer"
+      :style="{ marginTop: `${citationState.bibliographySpacing}px` }"
       contenteditable="false"
     >
       <p

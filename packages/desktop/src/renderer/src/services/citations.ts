@@ -7,7 +7,16 @@ import { collectCitations } from 'muya/lib/citations/collect'
 import type * as CitationProcessor from './citationProcessor'
 
 export interface CitationDocument { id: string; pathname?: string; markdown: string; isSaved?: boolean }
-export interface CitationConfig { bibliography: string[]; csl: string; title: string }
+export interface CitationConfig { bibliography: string[]; csl: string; title: string; spacing: number }
+
+export const DEFAULT_REFERENCE_SPACING = 30
+export const MAX_REFERENCE_SPACING = 1000
+const validateSpacing = (value: unknown): number => {
+  if (typeof value !== 'number' || !Number.isInteger(value) || value < 0 || value > MAX_REFERENCE_SPACING) {
+    throw new Error(t('citations.invalidSpacing', { max: MAX_REFERENCE_SPACING }))
+  }
+  return value
+}
 
 export const readCitationConfig = (markdown: string): CitationConfig | null => {
   const match = /^\uFEFF?---\r?\n([\s\S]*?)\r?\n---(?:\r?\n|$)/.exec(markdown)
@@ -24,7 +33,8 @@ export const readCitationConfig = (markdown: string): CitationConfig | null => {
   const csl = yaml.get('csl') ?? 'ieee'
   const title = yaml.get('reference-section-title') ?? t('citations.references')
   if (typeof csl !== 'string' || typeof title !== 'string') throw new Error(t('citations.invalidConfig'))
-  return { bibliography: paths as string[], csl, title }
+  const spacing = validateSpacing(yaml.get('reference-section-spacing') ?? DEFAULT_REFERENCE_SPACING)
+  return { bibliography: paths as string[], csl, title, spacing }
 }
 
 export const writeCitationConfig = (markdown: string, config: CitationConfig): string => {
@@ -34,6 +44,7 @@ export const writeCitationConfig = (markdown: string, config: CitationConfig): s
   yaml.set('bibliography', config.bibliography.length === 1 ? config.bibliography[0] : config.bibliography)
   yaml.set('csl', config.csl)
   yaml.set('reference-section-title', config.title)
+  yaml.set('reference-section-spacing', validateSpacing(config.spacing))
   return `---\n${yaml.toString()}---\n${match ? markdown.slice(match[0].length) : `\n${markdown}`}`
 }
 
@@ -47,6 +58,7 @@ export const citationState = shallowReactive({
   inline: new Map<string, { html: string; title: string }>(),
   bibliography: '',
   bibliographyTitle: '',
+  bibliographySpacing: DEFAULT_REFERENCE_SPACING,
   pending: false,
   revision: 0
 })
@@ -91,7 +103,7 @@ const resolvePath = (path: string, pathname?: string): string => {
 
 export const activateCitations = (id: string) => {
   if (citationState.documentId === id) return
-  Object.assign(citationState, { documentId: id, enabled: false, loading: false, error: '', notice: '', entries: [], inline: new Map(), bibliography: '', bibliographyTitle: '', pending: false })
+  Object.assign(citationState, { documentId: id, enabled: false, loading: false, error: '', notice: '', entries: [], inline: new Map(), bibliography: '', bibliographyTitle: '', bibliographySpacing: DEFAULT_REFERENCE_SPACING, pending: false })
 }
 
 export const updateCitations = async(
@@ -110,14 +122,16 @@ export const updateCitations = async(
     config = readCitationConfig(doc.markdown)
     if (!config) {
       if (options.saved) { session.savedBibliography = ''; session.savedKey = ''; session.savedTitle = '' }
-      if (citationState.documentId === doc.id) Object.assign(citationState, { enabled: false, loading: false, entries: [], inline: new Map(), error: '', notice: '', bibliography: session.savedBibliography, bibliographyTitle: session.savedTitle, pending: !!session.savedBibliography })
+      if (citationState.documentId === doc.id) Object.assign(citationState, { enabled: false, loading: false, entries: [], inline: new Map(), error: '', notice: '', bibliography: session.savedBibliography, bibliographyTitle: session.savedTitle, bibliographySpacing: DEFAULT_REFERENCE_SPACING, pending: !!session.savedBibliography })
       return undefined
     }
     if (citationState.documentId === doc.id) {
       citationState.enabled = true
       citationState.loading = !session.resources
+      citationState.bibliographySpacing = config.spacing
     }
-    const configKey = JSON.stringify([doc.pathname, config])
+    // Layout changes apply immediately without rerunning CSL or changing the saved list.
+    const configKey = JSON.stringify([doc.pathname, config.bibliography, config.csl, config.title])
     const engine = await getEngine()
     const sources = await Promise.all(config.bibliography.map(async(path) => {
       const resolved = resolvePath(path, doc.pathname)
@@ -176,5 +190,7 @@ export const citationFormatCount = () => formatCount
 export const prepareCitationExport = async(doc: CitationDocument, options: { footnote?: boolean; superSubScript?: boolean }) => {
   const result = await updateCitations(doc, { ...options, refresh: true })
   if (result?.missing.length) throw new Error(`${t('citations.missingKeys')}: ${result.missing.join(', ')}`)
-  return result
+  if (!result) return result
+  const spacing = readCitationConfig(doc.markdown)?.spacing ?? DEFAULT_REFERENCE_SPACING
+  return { ...result, bibliography: result.bibliography.replace('<section class="mt-bibliography"', `<section class="mt-bibliography" style="margin-top: ${spacing}px"`) }
 }

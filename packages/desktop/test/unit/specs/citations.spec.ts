@@ -156,11 +156,39 @@ describe('configuration, saved bibliography snapshots and caching', () => {
   it('reads multiple paths and preserves unrelated YAML fields and comments', () => {
     const markdown = '---\n# keep this\ntitle: Draft\nbibliography: [a.bib, b.bib]\n---\nText'
     expect(readCitationConfig(markdown)?.bibliography).toEqual(['a.bib', 'b.bib'])
-    const updated = writeCitationConfig(markdown, { bibliography: ['my.bib'], csl: 'apa', title: 'References' })
+    const updated = writeCitationConfig(markdown, { bibliography: ['my.bib'], csl: 'apa', title: 'References', spacing: 80 })
     expect(updated).toContain('# keep this')
     expect(updated).toContain('title: Draft')
     expect(updated).toContain('---\nText')
+    expect(readCitationConfig(updated)?.spacing).toBe(80)
+    expect(readCitationConfig(markdown)?.spacing).toBe(30)
     expect(readCitationConfig('---\ntitle: ordinary\n---\nText')).toBeNull()
+  })
+  it.each([-1, 1001, 1.5, '40', '.nan', '.inf'])('rejects invalid reference spacing %s', (spacing) => {
+    const markdown = doc('[@Vaswani2017]').markdown.replace('csl: ieee', `csl: ieee\nreference-section-spacing: ${typeof spacing === 'string' && spacing === '40' ? '"40"' : spacing}`)
+    expect(() => readCitationConfig(markdown)).toThrow(/invalidSpacing/)
+  })
+  it('changes spacing immediately without reformatting or refreshing the saved references', async() => {
+    const current = doc('[@Vaswani2017]', 'spacing-test')
+    activateCitations(current.id)
+    await updateCitations(current)
+    const saved = citationState.bibliography
+    const count = citationFormatCount()
+    const revision = citationState.revision
+    const changed = { ...current, markdown: current.markdown.replace('csl: ieee', 'csl: ieee\nreference-section-spacing: 80') }
+    await updateCitations(changed)
+    expect(citationState.bibliographySpacing).toBe(80)
+    expect(citationState.bibliography).toBe(saved)
+    expect(citationState.pending).toBe(false)
+    expect(citationFormatCount()).toBe(count)
+    expect(citationState.revision).toBe(revision)
+    const exported = await prepareCitationExport(changed, {})
+    expect(exported?.bibliography).toContain('style="margin-top: 80px"')
+    activateCitations('other-spacing-document')
+    expect(citationState.bibliographySpacing).toBe(30)
+    await updateCitations({ ...changed, markdown: changed.markdown.replace('spacing: 80', 'spacing: 0') })
+    const zeroGapExport = await prepareCitationExport({ ...changed, markdown: changed.markdown.replace('spacing: 80', 'spacing: 0') }, {})
+    expect(zeroGapExport?.bibliography).toContain('style="margin-top: 0px"')
   })
   it('updates inline references but freezes the bibliography until a successful save', async() => {
     activateCitations('save-test')

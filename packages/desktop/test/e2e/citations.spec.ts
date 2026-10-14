@@ -45,6 +45,8 @@ test.describe.serial('Bibliographic citations', () => {
     await citation.locator('.ag-citation-render').click()
     await expect(citation).toHaveClass(/ag-citation-editing/)
     await expect(citation.locator('.ag-citation-text')).toHaveText('[@Vaswani2017]')
+    // In a compact document the completion popup can cover the next paragraph.
+    await page.keyboard.press('Escape')
     await page.locator('.editor-component span.ag-paragraph').filter({ hasText: 'Second paragraph' }).click()
     await expect(citation).not.toHaveClass(/ag-citation-editing/)
     await expectNoRendererErrors(app)
@@ -78,11 +80,26 @@ test.describe.serial('Bibliographic citations', () => {
     await clickMenuById(app, 'citationsSettingsMenuItem')
     await expect(page.locator('.el-dialog')).toBeVisible()
     await expect(page.locator('.el-dialog textarea')).toHaveValue(/references\.bib/)
+    await expect(page.locator('.el-dialog .mt-reference-spacing input')).toHaveValue('30')
+    await page.locator('.el-dialog .mt-reference-spacing input').fill('80')
+    await page.locator('.el-dialog .mt-reference-spacing input').blur()
     await page.locator('.el-dialog input').last().fill('My References')
     await page.locator('.el-dialog .el-dialog__footer button').last().click()
     expect(await getMarkdownContent(page, app)).toContain('reference-section-title: My References')
+    expect(await getMarkdownContent(page, app)).toContain('reference-section-spacing: 80')
+    await expect(page.locator('.mt-reference-footer')).toHaveCSS('margin-top', '80px')
+    const gap = await page.evaluate(() => {
+      const lastBlock = document.querySelector('#ag-editor-id')?.lastElementChild
+      const footer = document.querySelector('.mt-reference-footer')
+      if (!lastBlock || !footer) throw new Error('Editor body or references is missing')
+      return footer.getBoundingClientRect().top - lastBlock.getBoundingClientRect().bottom
+    })
+    expect(Math.abs(gap - 80)).toBeLessThan(2)
     await clickMenuById(app, 'saveMenuItem')
     await expect(page.locator('.mt-reference-footer summary')).toHaveText('My References')
+    await clickMenuById(app, 'citationsSettingsMenuItem')
+    await expect(page.locator('.el-dialog .mt-reference-spacing input')).toHaveValue('80')
+    await page.locator('.el-dialog .el-dialog__footer button').first().click()
     await expectNoRendererErrors(app)
   })
   test('completes by citation key in the regular editor and undoes the insertion as one edit', async() => {
@@ -111,7 +128,7 @@ test.describe.serial('Bibliographic citations', () => {
     await page.evaluate((value) => {
       const cm = (document.querySelector('.source-code .CodeMirror') as Element & { CodeMirror: CM }).CodeMirror
       cm.setValue(value)
-    }, markdown.replace('[@Vaswani2017]', '[@zhang2024]'))
+    }, markdown.replace('[@Vaswani2017]', '[@zhang2024]').replace('csl: ieee', 'csl: ieee\nreference-section-spacing: 80'))
     const before = await page.locator('.mt-reference-footer .mt-bibliography').innerHTML()
     for (const type of ['styledHtml', 'pdf']) {
       const filePath = path.join(dir, type === 'pdf' ? 'citation.pdf' : 'citation.html')
@@ -129,6 +146,7 @@ test.describe.serial('Bibliographic citations', () => {
         expect(html).not.toContain('[@zhang2024]')
         expect(html).not.toContain('<pre class="front-matter">')
         expect(html).not.toContain('bibliography:')
+        expect(html).toContain('style="margin-top: 80px"')
       } else {
         expect(content.subarray(0, 4).toString()).toBe('%PDF')
         expect(content.length).toBeGreaterThan(1000)
