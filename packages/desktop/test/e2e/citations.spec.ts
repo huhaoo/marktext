@@ -139,6 +139,64 @@ test.describe.serial('Bibliographic citations', () => {
   })
 })
 
+for (const raw of ['[@Vaswani2017]', '[@Vaswani2017; @zhang2024, pp. 3–5]']) {
+  test(`keeps the viewport stable when the caret leaves ${raw} in a long document`, async() => {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'marktext-citation-scroll-'))
+    const bibPath = path.join(dir, 'references.bib')
+    fs.writeFileSync(bibPath, bibliography)
+    const paragraphs = Array.from({ length: 80 }, (_, index) => `Paragraph ${index}.`)
+    paragraphs.splice(30, 0, `Target ${raw}.`)
+    const markdown = `---\nbibliography: ${JSON.stringify(bibPath.replace(/\\/g, '/'))}\ncsl: ieee\n---\n\n${paragraphs.join('\n\n')}`
+    let app: ElectronApplication | undefined
+    try {
+      const launched = await launchWithMarkdown(markdown, { suppressErrorDialog: true })
+      app = launched.app
+      const page = launched.page
+      const citation = page.locator('.ag-citation').first()
+      await expect(citation.locator('.ag-citation-render')).toBeVisible()
+      await citation.evaluate(node => node.scrollIntoView({ block: 'center' }))
+      await citation.locator('.ag-citation-render').click()
+      await expect(citation).toHaveClass(/ag-citation-editing/)
+      // Put the caret just before the closing bracket, then leave with a real keypress.
+      await page.evaluate(() => {
+        const text = document.querySelector('.ag-citation-text')?.firstChild
+        const selection = window.getSelection()
+        if (!text?.textContent || !selection) throw new Error('Citation source or selection is missing')
+        selection.collapse(text, text.textContent.length - 1)
+      })
+      const before = await page.locator('.editor-component').evaluate(node => node.scrollTop)
+      await page.keyboard.press('ArrowRight')
+      await expect(citation).not.toHaveClass(/ag-citation-editing/)
+      // Include the deferred selection handler and any resulting scroll animation.
+      await page.waitForTimeout(250)
+      const after = await page.locator('.editor-component').evaluate(node => node.scrollTop)
+      expect(Math.abs(after - before)).toBeLessThan(2)
+      await page.keyboard.type('x')
+      expect(await getMarkdownContent(page, app)).toContain(`Target ${raw}x.`)
+      await citation.locator('.ag-citation-render').click()
+      await expect(citation).toHaveClass(/ag-citation-editing/)
+      await page.evaluate(() => {
+        const text = document.querySelector('.ag-citation-text')?.firstChild
+        const selection = window.getSelection()
+        if (!text || !selection) throw new Error('Citation source or selection is missing')
+        selection.collapse(text, 1)
+      })
+      const beforeLeft = await page.locator('.editor-component').evaluate(node => node.scrollTop)
+      await page.keyboard.press('ArrowLeft')
+      await expect(citation).not.toHaveClass(/ag-citation-editing/)
+      await page.waitForTimeout(250)
+      const afterLeft = await page.locator('.editor-component').evaluate(node => node.scrollTop)
+      expect(Math.abs(afterLeft - beforeLeft)).toBeLessThan(2)
+      await page.keyboard.type('y')
+      expect(await getMarkdownContent(page, app)).toContain(`Target y${raw}x.`)
+      await expectNoRendererErrors(app)
+    } finally {
+      if (app) await app.close()
+      fs.rmSync(dir, { recursive: true, force: true })
+    }
+  })
+}
+
 test('skips missing EndNote keys while keeping other entries usable and the library unchanged', async() => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'marktext-endnote-test-'))
   const bibPath = path.join(dir, 'endnote.txt')

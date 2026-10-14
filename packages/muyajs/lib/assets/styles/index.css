@@ -273,6 +273,8 @@ span.ag-ruby {
   width: 0;
   height: 0;
   overflow: hidden;
+  /* Prevent zero-width source text from wrapping and inflating caret coordinates. */
+  white-space: nowrap;
 }
 .ag-citation-editing > .ag-citation-render {
   display: none;
