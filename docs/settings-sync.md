@@ -17,10 +17,15 @@ The token is stored in the operating system credential store. It is not written 
 The Gist contains one JSON file named `marktext-settings.json` with these sections:
 
 - `preferences`: MarkText preference values, including LaTeX macros.
-- `dataCenter`: image paths, relative-image settings, uploader data, and image history.
+- `dataCenter`: relative image paths, relative-image settings, uploader data, and image history.
 - `keybindings`: custom keyboard shortcuts.
 
-Because `dataCenter` contains local paths and image/upload history, review the
+Absolute `imageFolderPath` and `screenshotFolderPath` values are specific to each
+computer. Uploads omit them, and downloads ignore them even in older Gists,
+preserving the current installation's directories. Relative image paths still
+sync. Local backups retain all original values, including absolute paths.
+
+Because `dataCenter` contains image paths and image/upload history, review the
 contents and access level of the Gist before sharing it. A private Gist is created
 by default. Downloading first writes a backup under the local
 `settings-sync-backups` directory. Matching values are then applied to the current

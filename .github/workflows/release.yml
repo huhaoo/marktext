@@ -53,6 +53,9 @@ jobs:
           console.log(`Validated ${tag}`);
           NODE
 
+      - name: Check portable settings sync paths
+        run: pnpm exec tsx scripts/test-settings-sync.mjs
+
       - run: pnpm test:unit
       - run: pnpm typecheck
       - run: pnpm lint

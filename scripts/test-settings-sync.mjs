@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict'
 import {
   createSettingsSyncBundle,
+  getPortableDataCenterSettings,
   parseSettingsSyncBundle
 } from '../packages/desktop/src/main/settingsSync/bundle.ts'
 
@@ -26,4 +27,44 @@ assert.throws(
   /不是 MarkText 设置同步文件/
 )
 
-console.log('Settings sync bundle: ok')
+const localSettings = {
+  imageFolderPath: String.raw`C:\Users\Administrator\AppData\Local\Programs\marktext\marktext-user-data\images`,
+  screenshotFolderPath: String.raw`C:\Users\Administrator\AppData\Local\Programs\marktext\marktext-user-data\screenshot`
+}
+const remoteSettings = {
+  imageFolderPath: String.raw`C:\Users\hh826\AppData\Local\Programs\marktext\marktext-user-data\images`,
+  screenshotFolderPath: String.raw`C:\Users\hh826\AppData\Local\Programs\marktext\marktext-user-data\screenshot`,
+  imageRelativeDirectoryName: 'assets',
+  currentUploader: 'picgo'
+}
+const portableSettings = getPortableDataCenterSettings(remoteSettings)
+assert.deepEqual(portableSettings, {
+  imageRelativeDirectoryName: 'assets',
+  currentUploader: 'picgo'
+})
+assert.deepEqual({ ...localSettings, ...portableSettings }, {
+  ...localSettings,
+  imageRelativeDirectoryName: 'assets',
+  currentUploader: 'picgo'
+})
+for (const directory of [
+  '/Users/other/Library/Application Support/marktext/images',
+  String.raw`\\server\share\images`,
+  'C:/Users/other/images',
+  'C:images',
+  '',
+  null
+]) {
+  assert.deepEqual(getPortableDataCenterSettings({ imageFolderPath: directory }), {})
+}
+assert.deepEqual(getPortableDataCenterSettings({ imageFolderPath: 'assets' }), {
+  imageFolderPath: 'assets'
+})
+// Backups retain the original local paths; only network transfer filters them.
+assert.deepEqual(createSettingsSyncBundle({}, remoteSettings, {}).dataCenter, remoteSettings)
+assert.deepEqual(
+  parseSettingsSyncBundle(createSettingsSyncBundle({}, remoteSettings, {})).dataCenter,
+  remoteSettings
+)
+
+console.log('Settings sync bundle and portable paths: ok')

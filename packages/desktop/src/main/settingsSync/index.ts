@@ -14,6 +14,7 @@ import type {
 } from '@shared/types/settingsSync'
 import {
   createSettingsSyncBundle,
+  getPortableDataCenterSettings,
   parseSettingsSyncBundle,
   SETTINGS_SYNC_FILE_NAME,
   SETTINGS_SYNC_INTERNAL_KEY,
@@ -115,6 +116,7 @@ class SettingsSync {
     }
 
     const bundle = await this._createBundle()
+    bundle.dataCenter = getPortableDataCenterSettings(bundle.dataCenter)
     const gistId = this._getGistId()
     const files = {
       [SETTINGS_SYNC_FILE_NAME]: {
@@ -199,7 +201,10 @@ class SettingsSync {
 
     const currentDataCenter = await this.dataCenter.getAll()
     const dataCenterKeys = new Set(Object.keys(currentDataCenter))
-    const dataCenterUpdates = this._pickKnownKeys(bundle.dataCenter, dataCenterKeys)
+    const dataCenterUpdates = this._pickKnownKeys(
+      getPortableDataCenterSettings(bundle.dataCenter),
+      dataCenterKeys
+    )
     await this.dataCenter.setItems(dataCenterUpdates)
 
     const saved = await this.keybindings.setUserKeybindings(Object.entries(bundle.keybindings))

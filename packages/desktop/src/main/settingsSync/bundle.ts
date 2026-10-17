@@ -1,3 +1,5 @@
+import path from 'node:path'
+
 export const SETTINGS_SYNC_FORMAT_VERSION = 1
 export const SETTINGS_SYNC_FILE_NAME = 'marktext-settings.json'
 export const SETTINGS_SYNC_INTERNAL_KEY = '__internal__'
@@ -17,6 +19,25 @@ const isRecord = (value: unknown): value is Record<string, unknown> => {
 const omitInternalKeys = (value: Record<string, unknown>): Record<string, unknown> => {
   return Object.fromEntries(
     Object.entries(value).filter(([key]) => key !== SETTINGS_SYNC_INTERNAL_KEY)
+  )
+}
+
+// Absolute storage directories belong to one installation, even when importing
+// a bundle from a different OS. Keep relative image paths portable.
+export const getPortableDataCenterSettings = (
+  value: Record<string, unknown>
+): Record<string, unknown> => {
+  return Object.fromEntries(
+    Object.entries(value).filter(([key, setting]) => {
+      if (key !== 'imageFolderPath' && key !== 'screenshotFolderPath') return true
+      return (
+        typeof setting === 'string' &&
+        setting.trim().length > 0 &&
+        !path.win32.isAbsolute(setting) &&
+        !path.posix.isAbsolute(setting) &&
+        !/^[a-z]:/i.test(setting)
+      )
+    })
   )
 }
 
